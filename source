@@ -2247,8 +2247,10 @@ do
 				ConsoleWindow.Items = Items
 				Library.ConsoleObject = ConsoleWindow
 
+				Items["Console"].Instance.Visible = false
+
 				if Library.UpdateConsoleIcon then
-					Library.UpdateConsoleIcon(Items["Console"].Instance.Visible)
+					Library.UpdateConsoleIcon(false)
 				end
 			end
 
@@ -4673,6 +4675,12 @@ do
 					BackgroundColor3 = Library.Theme["Background"]
 				}):AddToTheme({BackgroundColor3 = 'Background'})
 
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["MainFrame"].Instance,
+					CornerRadius = UDim.new(0, 6)
+				})
+
 				Items["MainFrame"]:MakeDraggable()
 				Items["MainFrame"]:MakeResizeable(Vector2.new(440, 440))
 
@@ -5583,6 +5591,12 @@ do
 					BackgroundColor3 = Library.Theme["Element"]
 				}):AddToTheme({BackgroundColor3 = 'Element'})
 
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["Header"].Instance,
+					CornerRadius = UDim.new(0, 3)
+				})
+
 				Library:Create("UIGradient", {
 					Name = "\0",
 					Parent = Items["Header"].Instance,
@@ -6338,6 +6352,12 @@ do
 					BackgroundColor3 = Library.Theme["Content"]
 				}):AddToTheme({BackgroundColor3 = 'Content'})
 
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["Indicator"].Instance,
+					CornerRadius = UDim.new(0, 3)
+				})
+
 				Library:Create("UIStroke", {
 					Name = "\0",
 					Parent = Items["Indicator"].Instance,
@@ -6891,6 +6911,12 @@ do
 					BackgroundColor3 = Library.Theme["Element"]
 				}):AddToTheme({BackgroundColor3 = 'Element'})
 
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["RealButton"].Instance,
+					CornerRadius = UDim.new(0, 4)
+				})
+
 				Library:Create("UIStroke", {
 					Name = "\0",
 					Parent = Items["RealButton"].Instance,
@@ -7178,6 +7204,12 @@ do
 					BackgroundColor3 = Library.Theme["Slider Track"]
 				}):AddToTheme({BackgroundColor3 = 'Slider Track'})
 
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["RealSlider"].Instance,
+					CornerRadius = UDim.new(1, 0)
+				})
+
 				Library:Create("UIGradient", {
 					Name = "\0",
 					Parent = Items["RealSlider"].Instance,
@@ -7197,6 +7229,12 @@ do
 					BorderSizePixel = 0,
 					BackgroundColor3 = Library.Theme["Accent"]
 				}):AddToTheme({BackgroundColor3 = 'Accent'})
+
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["Accent"].Instance,
+					CornerRadius = UDim.new(1, 0)
+				})
 
 				Items["AccentGradient"] = Library:Create("UIGradient", {
 					Name = "\0",
@@ -7535,6 +7573,12 @@ do
 					ClipsDescendants = true,
 					BackgroundColor3 = Library.Theme["Element"]
 				}):AddToTheme({BackgroundColor3 = 'Element'})
+
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["RealDropdown"].Instance,
+					CornerRadius = UDim.new(0, 4)
+				})
 
 				Library:Create("UIStroke", {
 					Name = "\0",
@@ -8370,6 +8414,12 @@ do
 					BorderSizePixel = 0,
 					BackgroundColor3 = Library.Theme["Inline"]
 				}):AddToTheme({BackgroundColor3 = 'Inline'})
+
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["Background"].Instance,
+					CornerRadius = UDim.new(0, 4)
+				})
 
 				Library:Create("UIStroke", {
 					Name = "\0",
