@@ -174,7 +174,7 @@ do
 				["Outline 3"] = Color3.fromRGB(15, 15, 15),
 				["Outline 4"] = Color3.fromRGB(10, 10, 10),
 				["Inactive Text"] = Color3.fromRGB(135, 135, 135),
-				["Accent"] = Color3.fromRGB(181, 32, 55),
+				["Accent"] = Color3.fromRGB(200, 30, 45),
 				["Hovered Element"] = Color3.fromRGB(35, 35, 35),
 				["Slider Track"] = Color3.fromRGB(24, 24, 24),
 				["Section Box"] = Color3.fromRGB(18, 18, 18),
@@ -5562,8 +5562,8 @@ do
 					BorderSizePixel = 0,
 					AutomaticSize = FullHeight and Enum.AutomaticSize.None or Enum.AutomaticSize.Y,
 					ClipsDescendants = true,
-					BackgroundColor3 = Library.Theme["Section Box"]
-				}):AddToTheme({BackgroundColor3 = 'Section Box'})
+					BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+				})
 
 				Library:Create("UIStroke", {
 					Name = "\0",
@@ -5586,26 +5586,9 @@ do
 					Name = "\0",
 					Parent = Items["Section"].Instance,
 					Position = UDim2.new(0, 0, 0, 0),
-					Size = UDim2.new(1, 0, 0, 25),
+					Size = UDim2.new(1, 0, 0, 22),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Element"]
-				}):AddToTheme({BackgroundColor3 = 'Element'})
-
-				Library:Create("UICorner", {
-					Name = "\0",
-					Parent = Items["Header"].Instance,
-					CornerRadius = UDim.new(0, 3)
-				})
-
-				Library:Create("UIGradient", {
-					Name = "\0",
-					Parent = Items["Header"].Instance,
-					Rotation = 90,
-					Color = ColorSequence.new{
-						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-						ColorSequenceKeypoint.new(0.5, Color3.fromRGB(218, 218, 218)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(167, 167, 167))
-					}
+					BackgroundColor3 = Color3.fromRGB(28, 28, 28)
 				})
 
 				Library:Create("Frame", {
@@ -5615,8 +5598,18 @@ do
 					Position = UDim2.new(0, 0, 1, 0),
 					Size = UDim2.new(1, 0, 0, 1),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Outline 1"]
-				}):AddToTheme({BackgroundColor3 = 'Outline 1'})
+					BackgroundColor3 = Library.Theme["Accent"]
+				}):AddToTheme({BackgroundColor3 = 'Accent'})
+
+				Library:Create("Frame", {
+					Name = "\0",
+					Parent = Items["Section"].Instance,
+					Position = UDim2.new(0, 0, 0, 22),
+					Size = UDim2.new(0, 1, 1, -22),
+					BorderSizePixel = 0,
+					ZIndex = 2,
+					BackgroundColor3 = Library.Theme["Accent"]
+				}):AddToTheme({BackgroundColor3 = 'Accent'})
 
 				Items["Text"] = Library:Create("TextLabel", {
 					Name = "\0",
@@ -6346,16 +6339,16 @@ do
 				Items["Indicator"] = Library:Create("Frame", {
 					Name = "\0",
 					Parent = Items["Toggle"].Instance,
-					Position = UDim2.new(0, 2, 0, 4),
-					Size = UDim2.new(0, 10, 0, 10),
+					Position = UDim2.new(0, 2, 0, 5),
+					Size = UDim2.new(0, 12, 0, 12),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Content"]
-				}):AddToTheme({BackgroundColor3 = 'Content'})
+					BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+				})
 
 				Library:Create("UICorner", {
 					Name = "\0",
 					Parent = Items["Indicator"].Instance,
-					CornerRadius = UDim.new(0, 3)
+					CornerRadius = UDim.new(0, 2)
 				})
 
 				Library:Create("UIStroke", {
@@ -6385,17 +6378,6 @@ do
 					BackgroundColor3 = Library.Theme["Accent"]
 				}):AddToTheme({BackgroundColor3 = 'Accent'})
 
-				Library:Create("UIGradient", {
-					Name = "\0",
-					Parent = Items["Inline"].Instance,
-					Rotation = 90,
-					Color = ColorSequence.new{
-						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-						ColorSequenceKeypoint.new(0.5, Color3.fromRGB(215, 215, 215)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 180, 180))
-					}
-				})
-
 				Items["Text"] = Library:Create("TextLabel", {
 					Name = "\0",
 					FontFace = Library.Font,
@@ -6405,7 +6387,7 @@ do
 					Text = Toggle.Name,
 					Size = UDim2.new(0, 0, 0, 16),
 					BackgroundTransparency = 1,
-					Position = UDim2.new(0, 20, 0, 0),
+					Position = UDim2.new(0, 22, 0, 2),
 					BorderSizePixel = 0,
 					AutomaticSize = Enum.AutomaticSize.X
 				}):AddToTheme({TextColor3 = 'Inactive Text'})
@@ -6868,7 +6850,7 @@ do
 			local ParentInstance = Library:ResolveParent(Parent)
 			local PerRow = ButtonPerRow[SizeName]
 			local Holder = ParentInstance
-			local ButtonSize = Params.RowWidth or UDim2.new(1, 0, 0, 20)
+			local ButtonSize = Params.RowWidth or UDim2.new(1, 0, 0, 26)
 
 			local TrackedRow = nil
 
@@ -6890,8 +6872,8 @@ do
 					Active = true,
 					Selectable = true,
 					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Inline"]
-				}):AddToTheme({BackgroundColor3 = 'Inline'})
+					BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+				})
 
 				if TrackedRow then
 					Library:TrackRow(TrackedRow)
@@ -6905,16 +6887,16 @@ do
 					TextColor3 = Color3.fromRGB(0, 0, 0),
 					Text = "",
 					AutoButtonColor = false,
-					Position = UDim2.new(0, 2, 0, 0),
-					Size = UDim2.new(1, -4, 0, 20),
+					Position = UDim2.new(0, 0, 0, 0),
+					Size = UDim2.new(1, 0, 1, 0),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Element"]
-				}):AddToTheme({BackgroundColor3 = 'Element'})
+					BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+				})
 
 				Library:Create("UICorner", {
 					Name = "\0",
 					Parent = Items["RealButton"].Instance,
-					CornerRadius = UDim.new(0, 4)
+					CornerRadius = UDim.new(0, 2)
 				})
 
 				Library:Create("UIStroke", {
@@ -6922,32 +6904,22 @@ do
 					Parent = Items["RealButton"].Instance,
 					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 3"],
-					BorderOffset = UDim.new(0, 1)
-				}):AddToTheme({Color = 'Outline 3'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["RealButton"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 1"]
+					Thickness = 1,
+					Color = Color3.fromRGB(45, 45, 45)
 				}):AddToTheme({Color = 'Outline 1'})
-
-				Library:Create("UIGradient", {
+				local AccentBar = Library:Create("Frame", {
 					Name = "\0",
 					Parent = Items["RealButton"].Instance,
-					Rotation = 90,
-					Color = ColorSequence.new{
-						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-						ColorSequenceKeypoint.new(0.5, Color3.fromRGB(236, 236, 236)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(208, 208, 208))
-					}
-				})
+					Size = UDim2.new(0, 2, 1, 0),
+					Position = UDim2.new(0, 0, 0, 0),
+					BorderSizePixel = 0,
+					ZIndex = 3,
+					BackgroundColor3 = Library.Theme["Accent"]
+				}):AddToTheme({BackgroundColor3 = 'Accent'})
 
 				Items["Text"] = Library:Create("TextLabel", {
 					Name = "\0",
-					FontFace = Library.Font,
+					FontFace = Library.BoldFont,
 					TextSize = Library.FontSize,
 					Parent = Items["RealButton"].Instance,
 					TextColor3 = Library.Theme["Text"],
@@ -6966,9 +6938,9 @@ do
 				})
 
 				Items["RealButton"]:OnHover(function()
-					Items["RealButton"]:Tween({BackgroundColor3 = Library.Theme["Hovered Element"]})
+					Items["RealButton"]:Tween({BackgroundColor3 = Color3.fromRGB(40, 40, 40)})
 				end, function()
-					Items["RealButton"]:Tween({BackgroundColor3 = Library.Theme["Element"]})
+					Items["RealButton"]:Tween({BackgroundColor3 = Color3.fromRGB(28, 28, 28)})
 				end)
 
 				Button.Items = Items
