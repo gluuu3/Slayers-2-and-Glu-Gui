@@ -174,7 +174,7 @@ do
 				["Outline 3"] = Color3.fromRGB(15, 15, 15),
 				["Outline 4"] = Color3.fromRGB(10, 10, 10),
 				["Inactive Text"] = Color3.fromRGB(135, 135, 135),
-				["Accent"] = Color3.fromRGB(200, 30, 45),
+				["Accent"] = Color3.fromRGB(181, 32, 55),
 				["Hovered Element"] = Color3.fromRGB(35, 35, 35),
 				["Slider Track"] = Color3.fromRGB(24, 24, 24),
 				["Section Box"] = Color3.fromRGB(18, 18, 18),
@@ -5562,8 +5562,8 @@ do
 					BorderSizePixel = 0,
 					AutomaticSize = FullHeight and Enum.AutomaticSize.None or Enum.AutomaticSize.Y,
 					ClipsDescendants = true,
-					BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-				})
+					BackgroundColor3 = Library.Theme["Section Box"]
+				}):AddToTheme({BackgroundColor3 = 'Section Box'})
 
 				Library:Create("UIStroke", {
 					Name = "\0",
@@ -5586,9 +5586,26 @@ do
 					Name = "\0",
 					Parent = Items["Section"].Instance,
 					Position = UDim2.new(0, 0, 0, 0),
-					Size = UDim2.new(1, 0, 0, 22),
+					Size = UDim2.new(1, 0, 0, 25),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+					BackgroundColor3 = Library.Theme["Element"]
+				}):AddToTheme({BackgroundColor3 = 'Element'})
+
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["Header"].Instance,
+					CornerRadius = UDim.new(0, 3)
+				})
+
+				Library:Create("UIGradient", {
+					Name = "\0",
+					Parent = Items["Header"].Instance,
+					Rotation = 90,
+					Color = ColorSequence.new{
+						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+						ColorSequenceKeypoint.new(0.5, Color3.fromRGB(218, 218, 218)),
+						ColorSequenceKeypoint.new(1, Color3.fromRGB(167, 167, 167))
+					}
 				})
 
 				Library:Create("Frame", {
@@ -5598,18 +5615,8 @@ do
 					Position = UDim2.new(0, 0, 1, 0),
 					Size = UDim2.new(1, 0, 0, 1),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Accent"]
-				}):AddToTheme({BackgroundColor3 = 'Accent'})
-
-				Library:Create("Frame", {
-					Name = "\0",
-					Parent = Items["Section"].Instance,
-					Position = UDim2.new(0, 0, 0, 22),
-					Size = UDim2.new(0, 1, 1, -22),
-					BorderSizePixel = 0,
-					ZIndex = 2,
-					BackgroundColor3 = Library.Theme["Accent"]
-				}):AddToTheme({BackgroundColor3 = 'Accent'})
+					BackgroundColor3 = Library.Theme["Outline 1"]
+				}):AddToTheme({BackgroundColor3 = 'Outline 1'})
 
 				Items["Text"] = Library:Create("TextLabel", {
 					Name = "\0",
@@ -6339,16 +6346,16 @@ do
 				Items["Indicator"] = Library:Create("Frame", {
 					Name = "\0",
 					Parent = Items["Toggle"].Instance,
-					Position = UDim2.new(0, 2, 0, 5),
-					Size = UDim2.new(0, 12, 0, 12),
+					Position = UDim2.new(0, 2, 0, 4),
+					Size = UDim2.new(0, 10, 0, 10),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-				})
+					BackgroundColor3 = Library.Theme["Content"]
+				}):AddToTheme({BackgroundColor3 = 'Content'})
 
 				Library:Create("UICorner", {
 					Name = "\0",
 					Parent = Items["Indicator"].Instance,
-					CornerRadius = UDim.new(0, 2)
+					CornerRadius = UDim.new(0, 3)
 				})
 
 				Library:Create("UIStroke", {
@@ -6378,6 +6385,17 @@ do
 					BackgroundColor3 = Library.Theme["Accent"]
 				}):AddToTheme({BackgroundColor3 = 'Accent'})
 
+				Library:Create("UIGradient", {
+					Name = "\0",
+					Parent = Items["Inline"].Instance,
+					Rotation = 90,
+					Color = ColorSequence.new{
+						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+						ColorSequenceKeypoint.new(0.5, Color3.fromRGB(215, 215, 215)),
+						ColorSequenceKeypoint.new(1, Color3.fromRGB(180, 180, 180))
+					}
+				})
+
 				Items["Text"] = Library:Create("TextLabel", {
 					Name = "\0",
 					FontFace = Library.Font,
@@ -6387,7 +6405,7 @@ do
 					Text = Toggle.Name,
 					Size = UDim2.new(0, 0, 0, 16),
 					BackgroundTransparency = 1,
-					Position = UDim2.new(0, 22, 0, 2),
+					Position = UDim2.new(0, 20, 0, 0),
 					BorderSizePixel = 0,
 					AutomaticSize = Enum.AutomaticSize.X
 				}):AddToTheme({TextColor3 = 'Inactive Text'})
@@ -6850,7 +6868,7 @@ do
 			local ParentInstance = Library:ResolveParent(Parent)
 			local PerRow = ButtonPerRow[SizeName]
 			local Holder = ParentInstance
-			local ButtonSize = Params.RowWidth or UDim2.new(1, 0, 0, 26)
+			local ButtonSize = Params.RowWidth or UDim2.new(1, 0, 0, 20)
 
 			local TrackedRow = nil
 
@@ -6872,8 +6890,8 @@ do
 					Active = true,
 					Selectable = true,
 					BorderSizePixel = 0,
-					BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-				})
+					BackgroundColor3 = Library.Theme["Inline"]
+				}):AddToTheme({BackgroundColor3 = 'Inline'})
 
 				if TrackedRow then
 					Library:TrackRow(TrackedRow)
@@ -6887,16 +6905,16 @@ do
 					TextColor3 = Color3.fromRGB(0, 0, 0),
 					Text = "",
 					AutoButtonColor = false,
-					Position = UDim2.new(0, 0, 0, 0),
-					Size = UDim2.new(1, 0, 1, 0),
+					Position = UDim2.new(0, 2, 0, 0),
+					Size = UDim2.new(1, -4, 0, 20),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-				})
+					BackgroundColor3 = Library.Theme["Element"]
+				}):AddToTheme({BackgroundColor3 = 'Element'})
 
 				Library:Create("UICorner", {
 					Name = "\0",
 					Parent = Items["RealButton"].Instance,
-					CornerRadius = UDim.new(0, 2)
+					CornerRadius = UDim.new(0, 4)
 				})
 
 				Library:Create("UIStroke", {
@@ -6904,22 +6922,32 @@ do
 					Parent = Items["RealButton"].Instance,
 					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 					LineJoinMode = Enum.LineJoinMode.Miter,
-					Thickness = 1,
-					Color = Color3.fromRGB(45, 45, 45)
-				}):AddToTheme({Color = 'Outline 1'})
-				local AccentBar = Library:Create("Frame", {
+					Color = Library.Theme["Outline 3"],
+					BorderOffset = UDim.new(0, 1)
+				}):AddToTheme({Color = 'Outline 3'})
+
+				Library:Create("UIStroke", {
 					Name = "\0",
 					Parent = Items["RealButton"].Instance,
-					Size = UDim2.new(0, 2, 1, 0),
-					Position = UDim2.new(0, 0, 0, 0),
-					BorderSizePixel = 0,
-					ZIndex = 3,
-					BackgroundColor3 = Library.Theme["Accent"]
-				}):AddToTheme({BackgroundColor3 = 'Accent'})
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					LineJoinMode = Enum.LineJoinMode.Miter,
+					Color = Library.Theme["Outline 1"]
+				}):AddToTheme({Color = 'Outline 1'})
+
+				Library:Create("UIGradient", {
+					Name = "\0",
+					Parent = Items["RealButton"].Instance,
+					Rotation = 90,
+					Color = ColorSequence.new{
+						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+						ColorSequenceKeypoint.new(0.5, Color3.fromRGB(236, 236, 236)),
+						ColorSequenceKeypoint.new(1, Color3.fromRGB(208, 208, 208))
+					}
+				})
 
 				Items["Text"] = Library:Create("TextLabel", {
 					Name = "\0",
-					FontFace = Library.BoldFont,
+					FontFace = Library.Font,
 					TextSize = Library.FontSize,
 					Parent = Items["RealButton"].Instance,
 					TextColor3 = Library.Theme["Text"],
@@ -6938,9 +6966,9 @@ do
 				})
 
 				Items["RealButton"]:OnHover(function()
-					Items["RealButton"]:Tween({BackgroundColor3 = Color3.fromRGB(40, 40, 40)})
+					Items["RealButton"]:Tween({BackgroundColor3 = Library.Theme["Hovered Element"]})
 				end, function()
-					Items["RealButton"]:Tween({BackgroundColor3 = Color3.fromRGB(28, 28, 28)})
+					Items["RealButton"]:Tween({BackgroundColor3 = Library.Theme["Element"]})
 				end)
 
 				Button.Items = Items
@@ -7871,19 +7899,22 @@ do
 						return
 					end
 
-					Dropdown.Value = Value
+					Dropdown.Value = table.clone(Value)
 
-					for Index, Value in Value do
-						local OptionData = Dropdown.Options[Value]
-
-						if OptionData then
+					for Name, OptionData in Dropdown.Options do
+						if table.find(Dropdown.Value, Name) then
 							OptionData.IsSelected = true
 							OptionData:ToggleState("Active")
+						else
+							OptionData.IsSelected = false
+							OptionData:ToggleState("Inactive")
 						end
 					end
 
-					Flags[Dropdown.Flag] = Value
-					Items["Value"].Instance.Text = table.concat(Value, ", ")
+					Flags[Dropdown.Flag] = Dropdown.Value
+					Items["Value"].Instance.Text = #Dropdown.Value > 0
+						and table.concat(Dropdown.Value, ", ")
+						or "....."
 				else
 					if not Dropdown.Options[Value] then
 						return
@@ -8039,6 +8070,21 @@ do
 					Dropdown.Options[Option].Button.Instance:Destroy()
 					Dropdown.Options[Option] = nil
 				end
+			end
+			function Dropdown:SetOptions(List)
+				Dropdown:Refresh(List)
+			end
+
+			function Dropdown:SetValues(List)
+				Dropdown:Refresh(List)
+			end
+
+			function Dropdown:SetList(List)
+				Dropdown:Refresh(List)
+			end
+
+			function Dropdown:SetValue(Value)
+				Dropdown:Set(Value)
 			end
 
 			function Dropdown:Refresh(List)
