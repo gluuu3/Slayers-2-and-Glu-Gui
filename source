@@ -29,7 +29,7 @@ do
 
 	Library = {
 		Flags = { },
-		MenuKeybind = tostring(Enum.KeyCode.X),
+		MenuKeybind = tostring(Enum.KeyCode.LeftControl),
 
 		Directory = "Vitality",
 		Folders = {
@@ -175,6 +175,7 @@ do
 				["Outline 4"] = Color3.fromRGB(10, 10, 13),
 				["Inactive Text"] = Color3.fromRGB(120, 120, 134),
 				["Accent"] = Color3.fromRGB(170, 150, 240),
+				["Selected Toggles"] = Color3.fromRGB(240, 240, 248),
 				["Hovered Element"] = Color3.fromRGB(36, 36, 45),
 				["Slider Track"] = Color3.fromRGB(30, 30, 38),
 				["Section Box"] = Color3.fromRGB(17, 17, 22),
@@ -1381,7 +1382,9 @@ do
 			["crosshair"] = {16898613044, 453, 869},
 			["target"] = {16898613869, 514, 771},
 			["sliders"] = {16898613777, 820, 355},
-			["gamepad"] = {16898613353, 710, 967}
+			["gamepad"] = {16898613353, 710, 967},
+			["chevron-down"] = {16898613777, 514, 967},
+			["chevron-up"] = {16898613044, 771, 0}
 		}
 
 		-- Yves wordmark (transparent PNG) shipped inline; written to disk and loaded with getcustomasset
@@ -2904,11 +2907,18 @@ do
 			Params = Params or { }
 
 			local KeybindList = {
-				Name = Params.Name or Params.name or 'Keybind',
+				Name = Params.Name or Params.name or "Keybinds",
 				Items = { },
+				Groups = { },
+				GroupCount = 0,
+				Collapsed = false
 			}
 
 			Library.KeyList = KeybindList
+
+			local ToHex = function(Color)
+				return string.format("#%02X%02X%02X", math.floor(Color.R * 255 + 0.5), math.floor(Color.G * 255 + 0.5), math.floor(Color.B * 255 + 0.5))
+			end
 
 			local Items = { } do
 				Items["KeybindList"] = Library:Create("Frame", {
@@ -2916,143 +2926,144 @@ do
 					Parent = Library.Holder.Instance,
 					AnchorPoint = Vector2.new(0, 0.5),
 					Position = UDim2.new(0, 20, 0.5, 0),
-					Size = UDim2.new(0, 172, 0, 0),
+					Size = UDim2.new(0, 190, 0, 0),
 					BorderSizePixel = 0,
-					AutomaticSize = Enum.AutomaticSize.XY,
+					AutomaticSize = Enum.AutomaticSize.Y,
 					BackgroundColor3 = Library.Theme["Background"]
 				}):AddToTheme({BackgroundColor3 = 'Background'})
 
 				Items["KeybindList"]:MakeDraggable()
 
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["KeybindList"].Instance,
+					CornerRadius = UDim.new(0, 10)
+				})
+
 				Library:Create("UIStroke", {
 					Name = "\0",
 					Parent = Items["KeybindList"].Instance,
 					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
 					Color = Library.Theme["Outline 1"]
 				}):AddToTheme({Color = 'Outline 1'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["KeybindList"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 3"],
-					BorderOffset = UDim.new(0, 1)
-				}):AddToTheme({Color = 'Outline 3'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["KeybindList"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 2"],
-					BorderOffset = UDim.new(0, 2)
-				}):AddToTheme({Color = 'Outline 2'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["KeybindList"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 4"],
-					BorderOffset = UDim.new(0, 3)
-				}):AddToTheme({Color = 'Outline 4'})
-
-				Items["AccentLine"] = Library:Create("Frame", {
-					Name = "\0",
-					Parent = Items["KeybindList"].Instance,
-					Size = UDim2.new(1, 0, 0, 1),
-					Position = UDim2.new(0, 0, 0, 0),
-					BorderSizePixel = 0,
-					ZIndex = 3,
-					BackgroundColor3 = Library.Theme["Accent"]
-				}):AddToTheme({BackgroundColor3 = 'Accent'})
-
-				Items["Text"] = Library:Create("Frame", {
-					Name = "\0",
-					Parent = Items["KeybindList"].Instance,
-					BackgroundTransparency = 1,
-					ZIndex = 3,
-					Size = UDim2.new(0, 0, 0, 18),
-					BorderSizePixel = 0,
-					Position = UDim2.new(0, 0, 0, 0),
-					AutomaticSize = Enum.AutomaticSize.XY
-				})
-
-				Library:Create("UIListLayout", {
-					Name = "\0",
-					Parent = Items["Text"].Instance,
-					FillDirection = Enum.FillDirection.Horizontal,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
-					Padding = UDim.new(0, 0),
-					SortOrder = Enum.SortOrder.LayoutOrder
-				})
-
-				local KbA = Library:Create("TextLabel", {
-					Name = "\0",
-					FontFace = Library.BoldFont,
-					TextSize = Library.FontSize,
-					Parent = Items["Text"].Instance,
-					LayoutOrder = 1,
-					RichText = false,
-					TextColor3 = Library.Theme["Accent"],
-					Text = KeybindList.Name,
-					ZIndex = 3,
-					Size = UDim2.new(0, 0, 0, 18),
-					BorderSizePixel = 0,
-					BackgroundTransparency = 1,
-					TextXAlignment = Enum.TextXAlignment.Left,
-					AutomaticSize = Enum.AutomaticSize.X
-				}):AddToTheme({TextColor3 = 'Accent'})
-
-				Library:Create("UIStroke", {Name = "\0", Parent = KbA.Instance})
-
-				Library:Create("TextLabel", {
-					Name = "\0",
-					FontFace = Library.BoldFont,
-					TextSize = Library.FontSize,
-					Parent = Items["Text"].Instance,
-					LayoutOrder = 2,
-					RichText = false,
-					TextColor3 = Library.Theme["Text"],
-					Text = " List",
-					ZIndex = 3,
-					Size = UDim2.new(0, 0, 0, 18),
-					BorderSizePixel = 0,
-					BackgroundTransparency = 1,
-					TextXAlignment = Enum.TextXAlignment.Left,
-					AutomaticSize = Enum.AutomaticSize.X
-				}):AddToTheme({TextColor3 = 'Text'})
 
 				Library:Create("UIPadding", {
 					Name = "\0",
 					Parent = Items["KeybindList"].Instance,
-					PaddingTop = UDim.new(0, 7),
-					PaddingBottom = UDim.new(0, 7),
-					PaddingRight = UDim.new(0, 8),
-					PaddingLeft = UDim.new(0, 8)
+					PaddingTop = UDim.new(0, 8),
+					PaddingBottom = UDim.new(0, 8),
+					PaddingRight = UDim.new(0, 10),
+					PaddingLeft = UDim.new(0, 10)
+				})
+
+				Library:Create("UIListLayout", {
+					Name = "\0",
+					Parent = Items["KeybindList"].Instance,
+					Padding = UDim.new(0, 6),
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+
+				Items["Header"] = Library:Create("Frame", {
+					Name = "\0",
+					Parent = Items["KeybindList"].Instance,
+					LayoutOrder = 1,
+					BackgroundTransparency = 1,
+					Size = UDim2.new(1, 0, 0, 20),
+					BorderSizePixel = 0
+				})
+
+				Library:LucideImage(Items["Header"], "keyboard", 14, "Accent", UDim2.new(0, 7, 0.5, 0), "k")
+
+				Items["Title"] = Library:Create("TextLabel", {
+					Name = "\0",
+					FontFace = Library.BoldFont,
+					TextSize = Library.FontSize,
+					Parent = Items["Header"].Instance,
+					TextColor3 = Library.Theme["Text"],
+					Text = KeybindList.Name,
+					AnchorPoint = Vector2.new(0, 0.5),
+					Position = UDim2.new(0, 22, 0.5, 0),
+					Size = UDim2.new(1, -48, 1, 0),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					TextXAlignment = Enum.TextXAlignment.Left
+				}):AddToTheme({TextColor3 = 'Text'})
+
+				Items["Collapse"] = Library:Create("TextButton", {
+					Name = "\0",
+					Parent = Items["Header"].Instance,
+					Text = "",
+					AutoButtonColor = false,
+					AnchorPoint = Vector2.new(1, 0.5),
+					Position = UDim2.new(1, 0, 0.5, 0),
+					Size = UDim2.new(0, 22, 0, 20),
+					BorderSizePixel = 0,
+					BackgroundTransparency = 1,
+					BackgroundColor3 = Library.Theme["Element"]
+				}):AddToTheme({BackgroundColor3 = 'Element'})
+
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["Collapse"].Instance,
+					CornerRadius = UDim.new(0, 6)
+				})
+
+				Items["CollapseIcon"] = Library:Create("Frame", {
+					Name = "\0",
+					Parent = Items["Collapse"].Instance,
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.new(0.5, 0, 0.5, 0),
+					Size = UDim2.new(0, 14, 0, 14),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0
 				})
 
 				Items["Content"] = Library:Create("Frame", {
 					Name = "\0",
 					Parent = Items["KeybindList"].Instance,
+					LayoutOrder = 2,
 					BackgroundTransparency = 1,
-					Position = UDim2.new(0, 0, 0, 24),
+					Size = UDim2.new(1, 0, 0, 0),
 					BorderSizePixel = 0,
-					AutomaticSize = Enum.AutomaticSize.XY
+					AutomaticSize = Enum.AutomaticSize.Y
 				})
 
 				Library:Create("UIListLayout", {
 					Name = "\0",
 					Parent = Items["Content"].Instance,
-					Padding = UDim.new(0, 5),
+					Padding = UDim.new(0, 2),
 					SortOrder = Enum.SortOrder.LayoutOrder
 				})
 
-				Library:AccentGradient(Items["AccentLine"], 0)
-
 				KeybindList.Items = Items
+			end
+
+			local DrawCollapse = function()
+				for _, Child in Items["CollapseIcon"].Instance:GetChildren() do
+					Child:Destroy()
+				end
+
+				Library:LucideImage(Items["CollapseIcon"], KeybindList.Collapsed and "chevron-down" or "chevron-up", 14, "Inactive Text", nil, KeybindList.Collapsed and "v" or "^")
+			end
+
+			DrawCollapse()
+
+			Items["Collapse"]:Connect("MouseEnter", function()
+				Items["Collapse"]:Tween({BackgroundTransparency = 0}, TweenInfo.new(0.12))
+			end)
+
+			Items["Collapse"]:Connect("MouseLeave", function()
+				Items["Collapse"]:Tween({BackgroundTransparency = 1}, TweenInfo.new(0.12))
+			end)
+
+			Items["Collapse"]:Connect("MouseButton1Click", function()
+				KeybindList:SetCollapsed(not KeybindList.Collapsed)
+			end)
+
+			function KeybindList:SetCollapsed(Bool)
+				KeybindList.Collapsed = Bool and true or false
+				Items["Content"].Instance.Visible = not KeybindList.Collapsed
+				DrawCollapse()
 			end
 
 			function KeybindList:Center()
@@ -3063,7 +3074,7 @@ do
 			end
 
 			function KeybindList:SetText(Text)
-				Items["Text"].Instance.Text = tostring(Text)
+				Items["Title"].Instance.Text = tostring(Text)
 			end
 
 			function KeybindList:SetVisibility(Bool)
@@ -3074,147 +3085,180 @@ do
 				end
 			end
 
-			function KeybindList:Add(Name, Mode)
-				local NewItems = { } do
-					NewItems["NewKey"] = Library:Create("Frame", {
+			local GetGroup = function(Name)
+				Name = Name or ""
+
+				local Group = KeybindList.Groups[Name]
+
+				if Group then
+					return Group
+				end
+
+				KeybindList.GroupCount += 1
+				Group = {Name = Name, Order = KeybindList.GroupCount * 1000, Count = 0, Rows = { }}
+				KeybindList.Groups[Name] = Group
+
+				if Name ~= "" then
+					Group.Header = Library:Create("Frame", {
 						Name = "\0",
 						Parent = Items["Content"].Instance,
+						LayoutOrder = Group.Order,
 						BackgroundTransparency = 1,
-						Size = UDim2.new(0, 180, 0, 18),
-						BorderSizePixel = 0
+						Size = UDim2.new(1, 0, 0, 22),
+						BorderSizePixel = 0,
+						Visible = false
 					})
 
-					NewItems["Holder"] = Library:Create("Frame", {
-						Name = "\0",
-						Parent = NewItems["NewKey"].Instance,
-						BackgroundTransparency = 1,
-						Size = UDim2.new(1, 0, 1, 0),
-						BorderSizePixel = 0
-					})
+					Library:LucideImage(Group.Header, Library.PageIcons[string.lower(Name)] or "gamepad", 13, "Inactive Text", UDim2.new(0, 7, 0.5, 2), "•")
 
-					NewItems["Text"] = Library:Create("TextLabel", {
+					Library:Create("TextLabel", {
 						Name = "\0",
-						FontFace = Library.Font,
+						FontFace = Library.BoldFont,
 						TextSize = Library.FontSize,
-						Parent = NewItems["Holder"].Instance,
-						RichText = true,
+						Parent = Group.Header.Instance,
 						TextColor3 = Library.Theme["Text"],
-						Text = "",
+						Text = Name,
 						AnchorPoint = Vector2.new(0, 0.5),
-						Size = UDim2.new(0, 0, 0, 18),
+						Position = UDim2.new(0, 22, 0.5, 2),
+						Size = UDim2.new(1, -22, 1, 0),
 						BackgroundTransparency = 1,
-						Position = UDim2.new(0, 0, 0.5, 0),
 						BorderSizePixel = 0,
-						AutomaticSize = Enum.AutomaticSize.X
+						TextXAlignment = Enum.TextXAlignment.Left,
+						TextTruncate = Enum.TextTruncate.AtEnd
 					}):AddToTheme({TextColor3 = 'Text'})
-
-					Library:Create("UIStroke", {
-						Name = "\0",
-						Parent = NewItems["Text"].Instance
-					})
-
-					NewItems["Mode"] = Library:Create("TextLabel", {
-						Name = "\0",
-						FontFace = Library.Font,
-						TextSize = Library.FontSize,
-						Parent = NewItems["Holder"].Instance,
-						TextColor3 = Library.Theme["Accent"],
-						Text = "always",
-						AnchorPoint = Vector2.new(1, 0.5),
-						Size = UDim2.new(0, 0, 0, 18),
-						BackgroundTransparency = 1,
-						Position = UDim2.new(1, 0, 0.5, 0),
-						BorderSizePixel = 0,
-						AutomaticSize = Enum.AutomaticSize.X
-					}):AddToTheme({TextColor3 = 'Accent'})
-
-					Library:Create("UIStroke", {
-						Name = "\0",
-						Parent = NewItems["Mode"].Instance
-					})
 				end
 
-				task.wait()
+				return Group
+			end
 
+			function KeybindList:Add(Name, Mode)
+				local NewItems = { }
+				local RowName, RowKey, RowGroup = tostring(Name or ""), "", ""
+				local Active = false
 				local CanBeVisible = true
+				local Group = nil
 
-				function NewItems:SetVis(Bool)
-					CanBeVisible = Bool
-				end
+				NewItems["NewKey"] = Library:Create("Frame", {
+					Name = "\0",
+					Parent = Items["Content"].Instance,
+					BackgroundTransparency = 1,
+					Size = UDim2.new(1, 0, 0, 18),
+					BorderSizePixel = 0,
+					Visible = false
+				})
 
-				local StateId = 0
+				NewItems["Text"] = Library:Create("TextLabel", {
+					Name = "\0",
+					FontFace = Library.Font,
+					TextSize = Library.FontSize,
+					Parent = NewItems["NewKey"].Instance,
+					RichText = true,
+					TextColor3 = Library.Theme["Text"],
+					Text = "",
+					AnchorPoint = Vector2.new(0, 0.5),
+					Position = UDim2.new(0, 22, 0.5, 0),
+					Size = UDim2.new(1, -58, 1, 0),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					TextXAlignment = Enum.TextXAlignment.Left,
+					TextTruncate = Enum.TextTruncate.AtEnd
+				}):AddToTheme({TextColor3 = 'Text'})
 
-				function NewItems:SetStatus(Bool)
-					StateId = StateId + 1
-					local Current = StateId
+				NewItems["Mode"] = Library:Create("TextLabel", {
+					Name = "\0",
+					FontFace = Library.BoldFont,
+					TextSize = Library.FontSize,
+					Parent = NewItems["NewKey"].Instance,
+					TextColor3 = Library.Theme["Accent"],
+					Text = "",
+					AnchorPoint = Vector2.new(1, 0.5),
+					Position = UDim2.new(1, 0, 0.5, 0),
+					Size = UDim2.new(0, 34, 1, 0),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					TextXAlignment = Enum.TextXAlignment.Right
+				}):AddToTheme({TextColor3 = 'Accent'})
 
-					if not CanBeVisible then
-						NewItems["NewKey"].Instance.Visible = false
+				local UpdateGroup = function()
+					if not Group or not Group.Header then
 						return
 					end
 
-					if Bool then
-						NewItems["NewKey"].Instance.Visible = true
+					local Any = false
 
-						NewItems["NewKey"]:Tween({Size = UDim2.new(0, 180, 0, 18), Position = UDim2.new(0, 0, 0, 0)})
-						NewItems["Text"]:Tween({TextTransparency = 0})
-						NewItems["Mode"]:Tween({TextTransparency = 0})
-					else
-						Library:Thread(function()
-							NewItems["NewKey"]:Tween({Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(-1, 0, 0, 0)})
-							local FadeText = NewItems["Text"]:Tween({TextTransparency = 1})
-							NewItems["Mode"]:Tween({TextTransparency = 1})
-							FadeText.Completed:Wait()
-
-							if Current ~= StateId then return end
-
-							NewItems["NewKey"].Instance.Visible = false
-						end)
+					for _, Row in Group.Rows do
+						if Row.Instance.Visible then
+							Any = true
+							break
+						end
 					end
+
+					Group.Header.Instance.Visible = Any
 				end
 
-				local RowName = ""
-				local RowMode = ""
-				local RowKey = ""
+				local Render = function()
+					local Bound = RowKey ~= "" and RowKey ~= "None"
 
-				local function RenderRow()
-					local Accent = Library.Theme["Accent"]
-					local Hex = string.format(
-						"#%02X%02X%02X",
-						math.floor(Accent.R * 255 + 0.5),
-						math.floor(Accent.G * 255 + 0.5),
-						math.floor(Accent.B * 255 + 0.5)
-					)
+					NewItems["NewKey"].Instance.Visible = CanBeVisible and Bound
+					NewItems["Text"].Instance.Text = RowName
+					NewItems["Text"].Instance.TextTransparency = Active and 0 or 0.4
+					NewItems["Mode"].Instance.Text = Bound and ("[" .. RowKey .. "]") or ""
+					NewItems["Mode"].Instance.TextTransparency = Active and 0 or 0.4
 
-					local Key = (RowKey ~= "" and RowKey ~= "None") and RowKey or "..."
-
-					NewItems["Text"].Instance.Text = string.format(
-						'<font color="%s">[%s]</font> - %s%s',
-						Hex,
-						Key,
-						RowName,
-						RowMode ~= "" and (" (" .. RowMode .. ")") or ""
-					)
+					UpdateGroup()
 				end
 
-				function NewItems:Set(Name, Mode, Key)
-					RowName = tostring(Name)
+				function NewItems:SetGroup(GroupName)
+					GroupName = tostring(GroupName or "")
 
-					if Mode ~= nil and Mode ~= "" then
-						RowMode = tostring(Mode)
+					if Group and Group.Name == GroupName then
+						return
 					end
+
+					if Group then
+						local Index = table.find(Group.Rows, NewItems["NewKey"])
+
+						if Index then
+							table.remove(Group.Rows, Index)
+						end
+
+						UpdateGroup()
+					end
+
+					Group = GetGroup(GroupName)
+					Group.Count += 1
+					NewItems["NewKey"].Instance.LayoutOrder = Group.Order + Group.Count
+					table.insert(Group.Rows, NewItems["NewKey"])
+
+					RowGroup = GroupName
+					Render()
+				end
+
+				function NewItems:SetVis(Bool)
+					CanBeVisible = Bool
+					Render()
+				end
+
+				function NewItems:SetStatus(Bool)
+					Active = Bool and true or false
+					Render()
+				end
+
+				function NewItems:Set(NewName, NewMode, Key)
+					RowName = tostring(NewName)
 
 					if Key ~= nil then
 						RowKey = tostring(Key)
 					end
 
-					RenderRow()
+					Render()
 				end
 
-				function NewItems:SetMode(Mode)
-					NewItems["Mode"].Instance.Text = ""
-					RenderRow()
+				function NewItems:SetMode()
+					Render()
 				end
+
+				NewItems:SetGroup("")
 
 				return NewItems
 			end
@@ -4622,6 +4666,7 @@ do
 
 			local Update = function()
 				if KeybindObject then
+					KeybindObject:SetGroup(Data.Page and Data.Page.Name or "")
 					KeybindObject:Set(Data.Name, Keybind.Mode, Keybind.Value)
 					KeybindObject:SetStatus(Keybind.Toggled)
 
@@ -4733,7 +4778,7 @@ do
 
 					Update()
 				elseif type(Key) == "table" then
-					local RealKey = Key.Key == "Backspace" and "None" or Key.Key
+					local RealKey = (Key.Key == "Backspace" or tostring(Key.Key) == "Enum.KeyCode.Backspace") and "None" or Key.Key
 					Keybind.Key = tostring(Key.Key)
 
 					if Key.Mode then
@@ -4953,7 +4998,25 @@ do
 				end
 			end
 
+			local UnlockBound = false
+
+			local SetUnlock = function(State)
+				if State and not UnlockBound then
+					UnlockBound = true
+
+					RunService:BindToRenderStep("YvesUnlockMouse", Enum.RenderPriority.Last.Value, function()
+						UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+						UserInputService.MouseIconEnabled = true
+					end)
+				elseif not State and UnlockBound then
+					UnlockBound = false
+					pcall(RunService.UnbindFromRenderStep, RunService, "YvesUnlockMouse")
+				end
+			end
+
 			Library.EffectsSet = function(State)
+				SetUnlock(State and true or false)
+
 				if Library.Effects.Enabled == false then
 					State = false
 				end
@@ -5004,6 +5067,7 @@ do
 			end
 
 			Library.EffectsDestroy = function()
+				SetUnlock(false)
 				IsOn = false
 
 				if Connection then
@@ -5048,7 +5112,16 @@ do
 
 				local Viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
 				local SideWidth = IsMobile and 132 or 160
-				local Width, Height = 700, 470
+				local Height = math.clamp(math.floor(Viewport.Y * 0.62), 440, 640)
+				local Width = math.min(math.floor(Height * 1.36), Viewport.X - 40)
+
+				if Params.Width then
+					Width = Params.Width
+				end
+
+				if Params.Height then
+					Height = Params.Height
+				end
 
 				if IsMobile then
 					Width = math.clamp(Viewport.X - 80, 380, 620)
@@ -5082,7 +5155,7 @@ do
 				}):AddToTheme({Color = 'Outline 1'})
 
 				Items["MainFrame"]:MakeDraggable()
-				Items["MainFrame"]:MakeResizeable(Vector2.new(IsMobile and math.max(300, Width - 60) or Width - 80, IsMobile and math.max(220, Height - 40) or Height - 50))
+				Items["MainFrame"]:MakeResizeable(Vector2.new(IsMobile and math.max(300, Width - 60) or math.max(560, Width - 90), IsMobile and math.max(220, Height - 40) or math.max(400, Height - 60)))
 
 				Library:RegisterWindow(Items["MainFrame"])
 
@@ -5392,23 +5465,160 @@ do
 					return Data.Order + Data.Count, Data
 				end
 
-				Window.FilterPages = function()
-					local Query = string.lower(Items["SearchBox"].Instance.Text or "")
+				Window.SearchHidden = { }
+				Window.SearchToken = 0
+
+				-- lower-cased text of everything readable inside an element row
+				local ElementText = function(Row)
+					local Parts = { }
+
+					for _, Descendant in Row:GetDescendants() do
+						if Descendant:IsA("TextLabel") or Descendant:IsA("TextButton") then
+							if Descendant.Text ~= "" then
+								table.insert(Parts, Descendant.Text)
+							end
+						end
+					end
+
+					if Row:IsA("TextButton") and Row.Text ~= "" then
+						table.insert(Parts, Row.Text)
+					end
+
+					return string.lower(table.concat(Parts, " "))
+				end
+
+				local RunFilter = function()
+					local Query = string.lower(string.match(Items["SearchBox"].Instance.Text or "", "^%s*(.-)%s*$"))
+
+					for Frame in Window.SearchHidden do
+						if Frame.Parent then
+							Frame.Visible = true
+						end
+					end
+
+					table.clear(Window.SearchHidden)
+
+					local Visible = { }
 
 					for _, Data in Window.Groups do
 						local Any = false
 
 						for _, Entry in Data.Pages do
-							local Match = Query == "" or string.find(string.lower(Entry.Name), Query, 1, true) ~= nil
-							Entry.Items["Inactive"].Instance.Visible = Match
-							Any = Any or Match
+							local NameMatch = Query == "" or string.find(string.lower(Entry.Name), Query, 1, true) ~= nil
+							local Hits = 0
+							local Pending = { }
+
+							if Query ~= "" then
+								for _, ColumnName in {"LeftColumn", "RightColumn"} do
+									local Column = Entry.Items[ColumnName]
+
+									if Column then
+										for _, SectionFrame in Column.Instance:GetChildren() do
+											if SectionFrame:IsA("Frame") then
+												local Content = SectionFrame:FindFirstChildOfClass("ScrollingFrame")
+												local SectionHits = 0
+												local Rows = { }
+												local SectionName = ""
+
+												for _, Child in SectionFrame:GetChildren() do
+													if Child:IsA("Frame") and Child ~= Content then
+														for _, Label in Child:GetDescendants() do
+															if Label:IsA("TextLabel") and Label.Text ~= "" then
+																SectionName = string.lower(Label.Text)
+																break
+															end
+														end
+
+														break
+													end
+												end
+
+												local SectionMatch = SectionName ~= "" and string.find(SectionName, Query, 1, true) ~= nil
+
+												if Content then
+													for _, Row in Content:GetChildren() do
+														if Row:IsA("GuiObject") then
+															local Match = string.find(ElementText(Row), Query, 1, true) ~= nil
+															table.insert(Rows, {Row = Row, Match = Match})
+
+															if Match then
+																SectionHits += 1
+															end
+														end
+													end
+												end
+
+												if SectionMatch then
+													SectionHits = math.max(SectionHits, 1)
+													Hits += 1
+												else
+													Hits += SectionHits
+												end
+
+												table.insert(Pending, {Frame = SectionFrame, Rows = Rows, Hits = SectionHits, SectionMatch = SectionMatch})
+											end
+										end
+									end
+								end
+
+								if not NameMatch and Hits > 0 then
+									for _, Section in Pending do
+										if Section.Hits == 0 then
+											Section.Frame.Visible = false
+											Window.SearchHidden[Section.Frame] = true
+										elseif not Section.SectionMatch then
+											for _, Item in Section.Rows do
+												if not Item.Match then
+													Item.Row.Visible = false
+													Window.SearchHidden[Item.Row] = true
+												end
+											end
+										end
+									end
+								end
+							end
+
+							local Show = NameMatch or Hits > 0
+
+							Entry.Items["Inactive"].Instance.Visible = Show
+							Visible[Entry] = Show
+							Any = Any or Show
 						end
 
 						if Data.Header then
 							Data.Header.Instance.Visible = Any
 						end
 					end
+
+					local Current = Window.Current
+
+					if Current and Visible[Current] == false then
+						for _, Data in Window.Groups do
+							for _, Entry in Data.Pages do
+								if Visible[Entry] then
+									task.defer(function()
+										Entry:Turn()
+									end)
+
+									return
+								end
+							end
+						end
+					end
 				end
+
+				Window.FilterPages = function()
+					Window.SearchToken += 1
+
+					local Token = Window.SearchToken
+
+					task.delay(0.12, function()
+						if Token == Window.SearchToken then
+							RunFilter()
+						end
+					end)
+				end
+
 
 				Items["SearchBox"]:Connect("Changed", function(Property)
 					if Property == "Text" then
@@ -6588,8 +6798,8 @@ do
 					BackgroundTransparency = 1,
 					Position = UDim2.new(0.5, 0, 0.5, 0),
 					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Accent"]
-				}):AddToTheme({BackgroundColor3 = 'Accent'})
+					BackgroundColor3 = Library.Theme["Selected Toggles"]
+				}):AddToTheme({BackgroundColor3 = 'Selected Toggles'})
 
 				Library:Create("UIGradient", {
 					Name = "\0",
@@ -11509,7 +11719,7 @@ do
 				MenuSection:Label({Name = "Menu Bind"}):Keybind({
 					Flag = "menu_bind",
 					Mode = "Toggle",
-					Default = Enum.KeyCode.RightShift,
+					Default = Enum.KeyCode.LeftControl,
 					Callback = function(Value)
 						Library.MenuKeybind = Flags["menu_bind"].Key
 					end
