@@ -1384,7 +1384,22 @@ do
 			["sliders"] = {16898613777, 820, 355},
 			["gamepad"] = {16898613353, 710, 967},
 			["chevron-down"] = {16898613777, 514, 967},
-			["chevron-up"] = {16898613044, 771, 0}
+			["chevron-up"] = {16898613044, 771, 0},
+			["scroll"] = {16898613699, 918, 808},
+			["fish"] = {16898613353, 869, 147},
+			["package"] = {16898613613, 918, 196},
+			["door-open"] = {16898613044, 967, 759},
+			["castle"] = {16898612819, 453, 869},
+			["skull"] = {16898613777, 49, 869},
+			["flame"] = {16898613353, 967, 306},
+			["map-pin"] = {16898613613, 820, 257},
+			["layout-grid"] = {16898613509, 918, 404},
+			["coins"] = {16898613509, 257, 869},
+			["pickaxe"] = {16898613699, 355, 771},
+			["crown"] = {16898613044, 404, 918},
+			["sword"] = {16898613777, 710, 967},
+			["compass"] = {16898613044, 514, 967},
+			["heart"] = {16898613613, 771, 147}
 		}
 
 		-- Yves wordmark (transparent PNG) shipped inline; written to disk and loaded with getcustomasset
@@ -1464,6 +1479,12 @@ do
 			}):AddToTheme({TextColor3 = 'Text'})
 		end
 
+		Library.IconAliases = {
+			["chest"] = "package", ["gate"] = "door-open", ["marker"] = "map-pin", ["grid"] = "layout-grid",
+			["location"] = "map-pin", ["map"] = "map-pin", ["gear"] = "settings", ["sliders-horizontal"] = "sliders",
+			["dungeon"] = "castle", ["loot"] = "package", ["quests"] = "scroll", ["bosses"] = "skull"
+		}
+
 		-- default icon per page name (lowercase)
 		Library.PageIcons = {
 			["skills"] = "swords", ["timing"] = "timer", ["defense"] = "shield", ["techs"] = "zap",
@@ -1475,6 +1496,7 @@ do
 
 		-- Parent can be a wrapped item or a raw instance. Falls back to text if the image fails to load.
 		Library.LucideImage = function(Self, Parent, Name, Size, ThemeKey, Position, Fallback)
+			Name = Library.IconAliases[Name] or Name
 			local Icon = Library.LucideIcons[Name]
 			local Host = Parent and (Parent.Instance or Parent)
 
@@ -4912,6 +4934,184 @@ do
 			end
 
 			return Keybind, Items
+		end
+
+		-- small API surface other scripts expect from this library
+		Library.MobileButton = true -- the floating open/close button is always built
+
+		Library.FitWindow = function() end
+		Library.Resync = function() end
+
+		Library.SetWatermark = function(Self, On)
+			if On then
+				if not Library.WatermarkObject then
+					Library:Watermark({Name = "Yves", SubName = ""})
+				end
+
+				Library.WatermarkObject:SetVisibility(true)
+			elseif Library.WatermarkObject then
+				Library.WatermarkObject:SetVisibility(false)
+			end
+		end
+
+		-- modal dialog: Params = {Kind, Title, Subtitle, Body, Dismissable, Buttons = {{Text, Style, Callback}}}
+		Library.Dialog = function(Self, Params)
+			Params = Params or { }
+
+			local Dialog = { Items = { } }
+			local Layer = Library:CreateLayer()
+			Layer.Instance.DisplayOrder = 3000000
+
+			local Kind = string.lower(tostring(Params.Kind or "info"))
+			local KindColor = ({
+				error = Color3.fromRGB(248, 113, 113),
+				warn = Color3.fromRGB(251, 191, 36),
+				success = Color3.fromRGB(74, 222, 128)
+			})[Kind]
+
+			local Overlay = Library:Create("TextButton", {
+				Name = "\0",
+				Parent = Layer.Instance,
+				Text = "",
+				AutoButtonColor = false,
+				Size = UDim2.new(1, 0, 1, 0),
+				BorderSizePixel = 0,
+				BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+				BackgroundTransparency = 0.45
+			})
+
+			local Card = Library:Create("Frame", {
+				Name = "\0",
+				Parent = Overlay.Instance,
+				Active = true,
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(0.5, 0, 0.5, 0),
+				Size = UDim2.new(0, 340, 0, 0),
+				AutomaticSize = Enum.AutomaticSize.Y,
+				BorderSizePixel = 0,
+				BackgroundColor3 = Library.Theme["Background"]
+			}):AddToTheme({BackgroundColor3 = 'Background'})
+
+			Library:Create("UICorner", {Name = "\0", Parent = Card.Instance, CornerRadius = UDim.new(0, 10)})
+
+			Library:Create("UIStroke", {
+				Name = "\0",
+				Parent = Card.Instance,
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				Color = KindColor or Library.Theme["Outline 1"]
+			})
+
+			Library:Create("UIPadding", {
+				Name = "\0",
+				Parent = Card.Instance,
+				PaddingTop = UDim.new(0, 14),
+				PaddingBottom = UDim.new(0, 14),
+				PaddingLeft = UDim.new(0, 16),
+				PaddingRight = UDim.new(0, 16)
+			})
+
+			Library:Create("UIListLayout", {
+				Name = "\0",
+				Parent = Card.Instance,
+				Padding = UDim.new(0, 8),
+				SortOrder = Enum.SortOrder.LayoutOrder
+			})
+
+			local AddText = function(Order, Text, Font, Size, ThemeKey)
+				if Text == nil or tostring(Text) == "" then
+					return
+				end
+
+				Library:Create("TextLabel", {
+					Name = "\0",
+					FontFace = Font,
+					TextSize = Size,
+					Parent = Card.Instance,
+					LayoutOrder = Order,
+					TextColor3 = Library.Theme[ThemeKey],
+					Text = tostring(Text),
+					TextWrapped = true,
+					TextXAlignment = Enum.TextXAlignment.Left,
+					TextYAlignment = Enum.TextYAlignment.Top,
+					Size = UDim2.new(1, 0, 0, 0),
+					AutomaticSize = Enum.AutomaticSize.Y,
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0
+				}):AddToTheme({TextColor3 = ThemeKey})
+			end
+
+			AddText(1, Params.Title, Library.BoldFont, Library.FontSize + 3, "Text")
+			AddText(2, Params.Subtitle, Library.Font, Library.FontSize - 1, "Inactive Text")
+			AddText(3, Params.Body, Library.Font, Library.FontSize, "Text")
+
+			local Row = Library:Create("Frame", {
+				Name = "\0",
+				Parent = Card.Instance,
+				LayoutOrder = 4,
+				Size = UDim2.new(1, 0, 0, 30),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0
+			})
+
+			Library:Create("UIListLayout", {
+				Name = "\0",
+				Parent = Row.Instance,
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Right,
+				VerticalAlignment = Enum.VerticalAlignment.Center,
+				Padding = UDim.new(0, 8),
+				SortOrder = Enum.SortOrder.LayoutOrder
+			})
+
+			function Dialog:Close()
+				pcall(function()
+					Layer.Instance:Destroy()
+				end)
+			end
+
+			local Buttons = Params.Buttons
+
+			if type(Buttons) ~= "table" or #Buttons == 0 then
+				Buttons = { { Text = "ok" } }
+			end
+
+			for Index, Data in Buttons do
+				local Danger = Data.Style == "danger"
+
+				local Button = Library:Create("TextButton", {
+					Name = "\0",
+					FontFace = Library.BoldFont,
+					TextSize = Library.FontSize,
+					Parent = Row.Instance,
+					LayoutOrder = Index,
+					Text = tostring(Data.Text or "ok"),
+					AutoButtonColor = false,
+					Size = UDim2.new(0, 0, 0, 30),
+					AutomaticSize = Enum.AutomaticSize.X,
+					BorderSizePixel = 0,
+					TextColor3 = Danger and Color3.fromRGB(248, 113, 113) or Library.Theme["Text"],
+					BackgroundColor3 = Library.Theme["Element"]
+				})
+
+				Library:Create("UIPadding", {Name = "\0", Parent = Button.Instance, PaddingLeft = UDim.new(0, 14), PaddingRight = UDim.new(0, 14)})
+				Library:Create("UICorner", {Name = "\0", Parent = Button.Instance, CornerRadius = UDim.new(0, 8)})
+
+				Button.Instance.MouseButton1Click:Connect(function()
+					Dialog:Close()
+
+					if Data.Callback then
+						task.spawn(Data.Callback)
+					end
+				end)
+			end
+
+			if Params.Dismissable ~= false then
+				Overlay.Instance.MouseButton1Click:Connect(function()
+					Dialog:Close()
+				end)
+			end
+
+			return Dialog
 		end
 
 		-- blur + snow overlay while a window is open. The snow sits on a layer below every window,
