@@ -38,7 +38,7 @@ do
 			Themes = "/Themes"
 		},
 
-		FontSize = 14,
+		FontSize = 13,
 
 		Animation = {
 			Time = 0.3,
@@ -165,22 +165,22 @@ do
 
 		local Themes = {
 			["Preset"] = {
-				["Background"] = Color3.fromRGB(23, 23, 23),
-				["Inline"] = Color3.fromRGB(22, 22, 22),
-				["Content"] = Color3.fromRGB(21, 21, 21),
-				["Text"] = Color3.fromRGB(200, 200, 200),
-				["Outline 1"] = Color3.fromRGB(35, 35, 35),
-				["Outline 2"] = Color3.fromRGB(30, 30, 30),
-				["Outline 3"] = Color3.fromRGB(15, 15, 15),
-				["Outline 4"] = Color3.fromRGB(10, 10, 10),
-				["Inactive Text"] = Color3.fromRGB(135, 135, 135),
-				["Accent"] = Color3.fromRGB(181, 32, 55),
-				["Hovered Element"] = Color3.fromRGB(35, 35, 35),
-				["Slider Track"] = Color3.fromRGB(24, 24, 24),
-				["Section Box"] = Color3.fromRGB(18, 18, 18),
-				["Console Body"] = Color3.fromRGB(17, 17, 17),
-				["Console Tab"] = Color3.fromRGB(24, 24, 24),
-				["Element"] = Color3.fromRGB(26, 26, 26),
+				["Background"] = Color3.fromRGB(12, 12, 15),
+				["Inline"] = Color3.fromRGB(15, 15, 19),
+				["Content"] = Color3.fromRGB(14, 14, 18),
+				["Text"] = Color3.fromRGB(230, 230, 238),
+				["Outline 1"] = Color3.fromRGB(34, 34, 42),
+				["Outline 2"] = Color3.fromRGB(24, 24, 30),
+				["Outline 3"] = Color3.fromRGB(14, 14, 18),
+				["Outline 4"] = Color3.fromRGB(10, 10, 13),
+				["Inactive Text"] = Color3.fromRGB(120, 120, 134),
+				["Accent"] = Color3.fromRGB(170, 150, 240),
+				["Hovered Element"] = Color3.fromRGB(36, 36, 45),
+				["Slider Track"] = Color3.fromRGB(30, 30, 38),
+				["Section Box"] = Color3.fromRGB(17, 17, 22),
+				["Console Body"] = Color3.fromRGB(15, 15, 19),
+				["Console Tab"] = Color3.fromRGB(22, 22, 28),
+				["Element"] = Color3.fromRGB(25, 25, 32),
 			}
 		}
 
@@ -411,7 +411,15 @@ do
 				Library.BoldFont = (BoldSuccess and BoldResult) or Enum.Font.Code
 			end
 
+			pcall(function()
+				local Inter = "rbxasset://fonts/families/Inter.json"
+				Library.Font = Font.new(Inter, Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+				Library.BoldFont = Font.new(Inter, Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
+				Library.FontSize = 13
+			end)
+
 		Library.Exit = function(Self)
+			if Library.EffectsDestroy then pcall(Library.EffectsDestroy) end
 			for _, Layer in Library.Layers do
 				pcall(function()
 					Layer.Instance:Destroy()
@@ -718,7 +726,7 @@ do
 
 			local LastX, LastY, LastW, LastH
 
-			local EdgeThickness = 2
+			local EdgeThickness = IsMobile and 8 or 4
 
 			local MakeEdge = function(Name, Position, Size)
 				local Button = Library:Create("TextButton", {
@@ -767,7 +775,7 @@ do
 				},
 			}
 
-			local CornerThickness = 6
+			local CornerThickness = IsMobile and 26 or 16
 
 			for _, Corner in {
 				{Side = "TL", Position = UDim2.new(0, 0, 0, 0)},
@@ -779,6 +787,26 @@ do
 					Button = MakeEdge(Corner.Side, Corner.Position, UDim2.new(0, CornerThickness, 0, CornerThickness)),
 					Side = Corner.Side
 				})
+			end
+
+			-- visible grip on the bottom-right corner so the resize handle is easy to find and grab
+			for _, Edge in Edges do
+				if Edge.Side == "BR" then
+					for Row = 0, 2 do
+						for Column = 0, 2 - Row do
+							Library:Create("Frame", {
+								Name = "\0",
+								Parent = Edge.Button.Instance,
+								AnchorPoint = Vector2.new(1, 1),
+								Position = UDim2.new(1, -(3 + Column * 4), 1, -(3 + Row * 4)),
+								Size = UDim2.new(0, 2, 0, 2),
+								BorderSizePixel = 0,
+								ZIndex = 99999,
+								BackgroundColor3 = Library.Theme["Inactive Text"]
+							}):AddToTheme({BackgroundColor3 = 'Inactive Text'})
+						end
+					end
+				end
 			end
 
 			local BeginResizing = function(Side)
@@ -859,6 +887,26 @@ do
 						y = y - (Minimum.Y - h)
 					end
 					h = Minimum.Y
+				end
+
+				local Bounds = Gui.Parent and Gui.Parent.AbsoluteSize
+
+				if Bounds then
+					local MaxW, MaxH = math.max(Minimum.X, Bounds.X - 12), math.max(Minimum.Y, Bounds.Y - 12)
+
+					if w > MaxW then
+						if string.find(CurrentSide, "L") then
+							x = x + (w - MaxW)
+						end
+						w = MaxW
+					end
+
+					if h > MaxH then
+						if string.find(CurrentSide, "T") then
+							y = y + (h - MaxH)
+						end
+						h = MaxH
+					end
 				end
 
 				if x ~= LastX or y ~= LastY then
@@ -1306,6 +1354,181 @@ do
 			end)
 
 			return true
+		end
+
+		-- Lucide icon sprites (asset ids from latte-soft/lucide-roblox): {sheet asset id, x, y}, 48x48 cells
+		Library.LucideIcons = {
+			["swords"] = {16898613777, 967, 759},
+			["timer"] = {16898613869, 918, 0},
+			["shield"] = {16898613777, 869, 0},
+			["zap"] = {16898613869, 918, 906},
+			["keyboard"] = {16898613509, 453, 820},
+			["hammer"] = {16898613509, 306, 820},
+			["user"] = {16898612819, 918, 514},
+			["sparkles"] = {16898613777, 918, 49},
+			["scan"] = {16898613353, 820, 147},
+			["wrench"] = {16898613699, 820, 0},
+			["play"] = {16898612819, 306, 918},
+			["trophy"] = {16898613869, 820, 147},
+			["eye"] = {16898613699, 869, 759},
+			["monitor"] = {16898613613, 404, 820},
+			["settings"] = {16898613777, 771, 257},
+			["search"] = {16898613353, 918, 196},
+			["x"] = {16898613869, 869, 906},
+			["minus"] = {16898613613, 771, 808},
+			["menu"] = {16898613613, 49, 820},
+			["home"] = {16898613509, 820, 147},
+			["crosshair"] = {16898613044, 453, 869},
+			["target"] = {16898613869, 514, 771},
+			["sliders"] = {16898613777, 820, 355},
+			["gamepad"] = {16898613353, 710, 967}
+		}
+
+		-- Yves wordmark (transparent PNG) shipped inline; written to disk and loaded with getcustomasset
+		Library.LogoAspect = 240 / 118
+		Library.LogoData = "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"
+
+		Library.LogoAsset = function(Self)
+			if Library.LogoCached ~= nil then
+				return Library.LogoCached or nil
+			end
+
+			Library.LogoCached = false
+
+			pcall(function()
+				local Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+				local Lookup = { }
+
+				for Index = 1, #Alphabet do
+					Lookup[string.byte(Alphabet, Index)] = Index - 1
+				end
+
+				local Data = string.gsub(Library.LogoData, "[^%w%+/]", "")
+				local Bytes = { }
+				local Buffer, Count = 0, 0
+
+				for Index = 1, #Data do
+					Buffer = Buffer * 64 + Lookup[string.byte(Data, Index)]
+					Count += 1
+
+					if Count == 4 then
+						table.insert(Bytes, string.char(math.floor(Buffer / 65536) % 256, math.floor(Buffer / 256) % 256, Buffer % 256))
+						Buffer, Count = 0, 0
+					end
+				end
+
+				local Path = Library.Directory .. Library.Folders.Assets .. "/yves_logo.png"
+				writefile(Path, table.concat(Bytes))
+				Library.LogoCached = getcustomasset(Path)
+			end)
+
+			return Library.LogoCached or nil
+		end
+
+		-- Parent can be a wrapped item or a raw instance. Falls back to plain text if the image can not be loaded.
+		Library.Logo = function(Self, Parent, Height, Position, Anchor)
+			local Host = Parent.Instance or Parent
+			local Asset = Library:LogoAsset()
+
+			if Asset then
+				return Library:Create("ImageLabel", {
+					Name = "\0",
+					Parent = Host,
+					AnchorPoint = Anchor or Vector2.new(0, 0),
+					Position = Position,
+					Size = UDim2.new(0, math.floor(Height * Library.LogoAspect), 0, Height),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					ScaleType = Enum.ScaleType.Fit,
+					Image = Asset,
+					ZIndex = 4
+				})
+			end
+
+			return Library:Create("TextLabel", {
+				Name = "\0",
+				FontFace = Library.BoldFont,
+				TextSize = math.floor(Height * 0.7),
+				Parent = Host,
+				AnchorPoint = Anchor or Vector2.new(0, 0),
+				Position = Position,
+				Size = UDim2.new(0, math.floor(Height * Library.LogoAspect), 0, Height),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Text = "Yves",
+				TextColor3 = Library.Theme["Text"],
+				ZIndex = 4
+			}):AddToTheme({TextColor3 = 'Text'})
+		end
+
+		-- default icon per page name (lowercase)
+		Library.PageIcons = {
+			["skills"] = "swords", ["timing"] = "timer", ["defense"] = "shield", ["techs"] = "zap",
+			["macro"] = "keyboard", ["macro & builder"] = "keyboard", ["builder"] = "hammer", ["character"] = "user", ["special"] = "sparkles",
+			["hitbox"] = "scan", ["utility"] = "wrench", ["auto play"] = "play", ["ranked farm"] = "trophy",
+			["esp"] = "eye", ["client"] = "monitor", ["settings"] = "settings", ["combat"] = "swords",
+			["misc"] = "gamepad", ["visuals"] = "eye", ["main"] = "home", ["home"] = "home", ["farm"] = "play"
+		}
+
+		-- Parent can be a wrapped item or a raw instance. Falls back to text if the image fails to load.
+		Library.LucideImage = function(Self, Parent, Name, Size, ThemeKey, Position, Fallback)
+			local Icon = Library.LucideIcons[Name]
+			local Host = Parent and (Parent.Instance or Parent)
+
+			if not Icon or not Host then
+				return nil
+			end
+
+			Position = Position or UDim2.new(0.5, 0, 0.5, 0)
+			ThemeKey = ThemeKey or "Text"
+
+			local Image = Library:Create("ImageLabel", {
+				Name = "\0",
+				Parent = Host,
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = Position,
+				Size = UDim2.new(0, Size, 0, Size),
+				ZIndex = 3,
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				Image = "rbxassetid://" .. Icon[1],
+				ImageRectSize = Vector2.new(48, 48),
+				ImageRectOffset = Vector2.new(Icon[2], Icon[3]),
+				ImageColor3 = Library.Theme[ThemeKey]
+			}):AddToTheme({ImageColor3 = ThemeKey})
+
+			if Fallback then
+				Library:Thread(function()
+					local Clock = os.clock()
+
+					local Tries = 0
+
+					while Image.Instance.Parent and not Image.Instance.IsLoaded and Tries < 120 do
+						Tries += 1
+						task.wait(0.1)
+					end
+
+					if Image.Instance.Parent and not Image.Instance.IsLoaded then
+						Image.Instance.Visible = false
+
+						Library:Create("TextLabel", {
+							Name = "\0",
+							Parent = Host,
+							AnchorPoint = Vector2.new(0.5, 0.5),
+							Position = Position,
+							Size = UDim2.new(0, Size, 0, Size),
+							ZIndex = 3,
+							BackgroundTransparency = 1,
+							Text = Fallback,
+							FontFace = Library.BoldFont,
+							TextSize = Library.FontSize + 2,
+							TextColor3 = Library.Theme[ThemeKey]
+						}):AddToTheme({TextColor3 = ThemeKey})
+					end
+				end)
+			end
+
+			return Image
 		end
 
 		Library.AccentGradientStart = Color3.fromRGB(255, 255, 255)
@@ -4646,6 +4869,168 @@ do
 			return Keybind, Items
 		end
 
+		-- blur + snow overlay while a window is open. The snow sits on a layer below every window,
+		-- so the UI stays crisp. One RenderStepped connection moves a handful of tiny frames, which is cheap.
+		Library.Effects = {
+			Enabled = true,
+			BlurSize = 14,
+			SnowCount = IsMobile and 24 or 44
+		}
+
+		do
+			local Lighting = game:GetService("Lighting")
+
+			local Blur = nil
+			local Snow = nil
+			local Flakes = { }
+			local Connection = nil
+			local IsOn = false
+			local Last = 0
+			local Clock = 0
+
+			local Build = function()
+				if Snow then
+					return
+				end
+
+				Snow = Library:Create("ScreenGui", {
+					Parent = gethui(),
+					IgnoreGuiInset = true,
+					Name = "\0",
+					DisplayOrder = 1,
+					Enabled = false,
+					ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+					ResetOnSpawn = false
+				})
+
+				table.insert(Library.Layers, Snow)
+
+				local Rand = Random.new()
+
+				for Index = 1, Library.Effects.SnowCount do
+					local Size = Rand:NextInteger(2, 5)
+					local Frame = Instance.new("Frame")
+
+					Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+					Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+					Frame.BackgroundTransparency = Rand:NextNumber(0.2, 0.65)
+					Frame.BorderSizePixel = 0
+					Frame.Size = UDim2.fromOffset(Size, Size)
+
+					local Corner = Instance.new("UICorner")
+					Corner.CornerRadius = UDim.new(1, 0)
+					Corner.Parent = Frame
+
+					Frame.Parent = Snow.Instance
+
+					Flakes[Index] = {
+						Frame = Frame,
+						X = Rand:NextNumber(),
+						Y = Rand:NextNumber(),
+						Speed = (0.05 + Size * 0.02) * Rand:NextNumber(0.8, 1.2),
+						Sway = Rand:NextNumber(0.004, 0.02),
+						Phase = Rand:NextNumber(0, 6.28),
+						Rate = Rand:NextNumber(0.6, 1.6)
+					}
+				end
+			end
+
+			local Step = function()
+				local Now = os.clock()
+				local Delta = math.min(Now - Last, 0.1)
+				Last = Now
+				Clock += Delta
+
+				for _, Flake in Flakes do
+					Flake.Y += Flake.Speed * Delta
+
+					if Flake.Y > 1.04 then
+						Flake.Y = -0.04
+						Flake.X = math.random()
+					end
+
+					Flake.Frame.Position = UDim2.new(Flake.X + math.sin(Clock * Flake.Rate + Flake.Phase) * Flake.Sway, 0, Flake.Y, 0)
+				end
+			end
+
+			Library.EffectsSet = function(State)
+				if Library.Effects.Enabled == false then
+					State = false
+				end
+
+				State = State and true or false
+				IsOn = State
+
+				if State then
+					Build()
+
+					if not Blur then
+						Blur = Instance.new("BlurEffect")
+						Blur.Name = "\0"
+						Blur.Size = 0
+						Blur.Parent = Lighting
+					end
+
+					Blur.Enabled = true
+					TweenService:Create(Blur, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = Library.Effects.BlurSize}):Play()
+
+					Snow.Instance.Enabled = true
+
+					if not Connection then
+						Last = os.clock()
+						Connection = RunService.RenderStepped:Connect(Step)
+					end
+				else
+					if Blur then
+						local Fade = TweenService:Create(Blur, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = 0})
+						Fade:Play()
+
+						Fade.Completed:Once(function()
+							if Blur and not IsOn then
+								Blur.Enabled = false
+							end
+						end)
+					end
+
+					if Snow then
+						Snow.Instance.Enabled = false
+					end
+
+					if Connection then
+						Connection:Disconnect()
+						Connection = nil
+					end
+				end
+			end
+
+			Library.EffectsDestroy = function()
+				IsOn = false
+
+				if Connection then
+					Connection:Disconnect()
+					Connection = nil
+				end
+
+				if Blur then
+					pcall(function()
+						Blur:Destroy()
+					end)
+
+					Blur = nil
+				end
+
+				if Snow then
+					pcall(function()
+						Snow.Instance:Destroy()
+					end)
+
+					Snow = nil
+				end
+
+				table.clear(Flakes)
+			end
+		end
+
 		Library.Window = function(Self, Params)
 			Params = Params or { }
 
@@ -4658,206 +5043,76 @@ do
 			}
 
 			local Items = { } do
+				Window.Groups = { }
+				Window.GroupCount = 0
+
+				local Viewport = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1280, 720)
+				local SideWidth = IsMobile and 132 or 160
+				local Width, Height = 700, 470
+
 				if IsMobile then
-					Library:Create("UIScale", {
-						Parent = Items["MainFrame"],
-						Scale = 0.67
-					})
+					Width = math.clamp(Viewport.X - 80, 380, 620)
+					Height = math.clamp(Viewport.Y - 50, 240, 400)
 				end
+
+				local Hover = TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
 
 				Items["MainFrame"] = Library:Create("Frame", {
 					Name = "\0",
 					Parent = Library.Holder.Instance,
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					Position = UDim2.new(0.5, 0, 0.5, 0),
-					Size = UDim2.new(0, 485, 0, 520),
+					Size = UDim2.new(0, Width, 0, Height),
 					BorderSizePixel = 0,
+					ClipsDescendants = true,
 					BackgroundColor3 = Library.Theme["Background"]
 				}):AddToTheme({BackgroundColor3 = 'Background'})
 
 				Library:Create("UICorner", {
 					Name = "\0",
 					Parent = Items["MainFrame"].Instance,
-					CornerRadius = UDim.new(0, 6)
+					CornerRadius = UDim.new(0, 10)
 				})
 
+				Library:Create("UIStroke", {
+					Name = "\0",
+					Parent = Items["MainFrame"].Instance,
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					Color = Library.Theme["Outline 1"]
+				}):AddToTheme({Color = 'Outline 1'})
+
 				Items["MainFrame"]:MakeDraggable()
-				Items["MainFrame"]:MakeResizeable(Vector2.new(440, 440))
+				Items["MainFrame"]:MakeResizeable(Vector2.new(IsMobile and math.max(300, Width - 60) or Width - 80, IsMobile and math.max(220, Height - 40) or Height - 50))
 
 				Library:RegisterWindow(Items["MainFrame"])
 
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["MainFrame"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 1"]
-				}):AddToTheme({Color = 'Outline 1'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["MainFrame"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 3"],
-					BorderOffset = UDim.new(0, 1)
-				}):AddToTheme({Color = 'Outline 3'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["MainFrame"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 2"],
-					BorderOffset = UDim.new(0, 2)
-				}):AddToTheme({Color = 'Outline 2'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["MainFrame"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 4"],
-					BorderOffset = UDim.new(0, 3)
-				}):AddToTheme({Color = 'Outline 4'})
-
-				Items["AccentLine"] = Library:Create("Frame", {
-					Name = "\0",
-					Parent = Items["MainFrame"].Instance,
-					Size = UDim2.new(1, 0, 0, 1),
-					Position = UDim2.new(0, 0, 0, 0),
-					BorderSizePixel = 0,
-					ZIndex = 3,
-					BackgroundColor3 = Library.Theme["Accent"]
-				}):AddToTheme({BackgroundColor3 = 'Accent'})
-
-				Library:AccentGradient(Items["AccentLine"], 0)
-
-				Items["Pages"] = Library:Create("Frame", {
+				-- sidebar
+				Items["Sidebar"] = Library:Create("Frame", {
 					Name = "\0",
 					Parent = Items["MainFrame"].Instance,
 					BackgroundTransparency = 1,
-					Position = UDim2.new(0, 6, 0, 33),
-					Size = UDim2.new(1, -12, 0, 22),
+					Size = UDim2.new(0, SideWidth, 1, 0),
 					BorderSizePixel = 0
 				})
 
-				Library:Create("UIListLayout", {
-					Name = "\0",
-					Parent = Items["Pages"].Instance,
-					FillDirection = Enum.FillDirection.Horizontal,
-					Padding = UDim.new(0, 0),
-					SortOrder = Enum.SortOrder.LayoutOrder
-				})
-
-				Items["Content"] = Library:Create("Frame", {
-					Name = "\0",
-					Parent = Items["MainFrame"].Instance,
-					Position = UDim2.new(0, 8, 0, 58),
-					Size = UDim2.new(1, -16, 1, -66),
-					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Content"]
-				}):AddToTheme({BackgroundColor3 = 'Content'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["Content"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 1"]
-				}):AddToTheme({Color = 'Outline 1'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["Content"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 3"],
-					BorderOffset = UDim.new(0, 1)
-				}):AddToTheme({Color = 'Outline 3'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["Content"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 2"],
-					BorderOffset = UDim.new(0, 2)
-				}):AddToTheme({Color = 'Outline 2'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["Content"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 4"],
-					BorderOffset = UDim.new(0, 3)
-				}):AddToTheme({Color = 'Outline 4'})
-
-				Items["Title"] = Library:Create("Frame", {
-					Name = "\0",
-					Parent = Items["MainFrame"].Instance,
-					BorderSizePixel = 0,
-					Position = UDim2.new(0, 0, 0, 1),
-					Size = UDim2.new(1, 0, 0, 29),
-					ZIndex = 2,
-					BackgroundColor3 = Library.Theme["Inline"]
-				}):AddToTheme({BackgroundColor3 = 'Inline'})
-
 				Library:Create("Frame", {
 					Name = "\0",
-					Parent = Items["Title"].Instance,
-					AnchorPoint = Vector2.new(0, 1),
-					Position = UDim2.new(0, 0, 1, 0),
-					Size = UDim2.new(1, 0, 0, 1),
-					ZIndex = 3,
+					Parent = Items["MainFrame"].Instance,
+					Position = UDim2.new(0, SideWidth, 0, 0),
+					Size = UDim2.new(0, 1, 1, 0),
 					BorderSizePixel = 0,
 					BackgroundColor3 = Library.Theme["Outline 1"]
 				}):AddToTheme({BackgroundColor3 = 'Outline 1'})
 
-				Library:Shade(Items["Title"])
-
-				Items["Icon"] = Library:Create("Frame", {
-					Name = "\0",
-					Parent = Items["Title"].Instance,
-					AnchorPoint = Vector2.new(0, 0.5),
-					Position = UDim2.new(0, 9, 0.5, 0),
-					Size = UDim2.new(0, 16, 0, 16),
-					ZIndex = 3,
-					BorderSizePixel = 0,
-					BackgroundTransparency = 1
-				})
-
-				local IconBars = {
-					{Position = UDim2.new(0, 0, 0.5, -1), Size = UDim2.new(0, 4, 0, 2), Rotation = 0, Center = false},
-					{Position = UDim2.new(0, 6, 0.5, 0), Size = UDim2.new(0, 2, 0, 10), Rotation = 35, Center = true},
-					{Position = UDim2.new(0, 10, 0.5, 0), Size = UDim2.new(0, 2, 0, 10), Rotation = -35, Center = true},
-					{Position = UDim2.new(0, 12, 0.5, -1), Size = UDim2.new(0, 4, 0, 2), Rotation = 0, Center = false}
-				}
-
-				for _, Bar in IconBars do
-					local Piece = Library:Create("Frame", {
-						Name = "\0",
-						Parent = Items["Icon"].Instance,
-						AnchorPoint = Bar.Center and Vector2.new(0.5, 0.5) or Vector2.new(0, 0),
-						Position = Bar.Position,
-						Size = Bar.Size,
-						Rotation = Bar.Rotation,
-						ZIndex = 4,
-						BorderSizePixel = 0,
-						BackgroundColor3 = Library.Theme["Accent"]
-					}):AddToTheme({BackgroundColor3 = 'Accent'})
-
-					Library:AccentGradient(Piece, 90)
-				end
+				Items["Logo"] = Library:Logo(Items["Sidebar"], 26, UDim2.new(0, 14, 0, 26), Vector2.new(0, 0.5))
 
 				Items["ActualTitle"] = Library:Create("Frame", {
 					Name = "\0",
-					Parent = Items["Title"].Instance,
+					Parent = Items["Sidebar"].Instance,
 					BackgroundTransparency = 1,
 					AnchorPoint = Vector2.new(0, 0.5),
-					Position = UDim2.new(0, 30, 0.5, 0),
-					Size = UDim2.new(0, 0, 0, 18),
+					Position = UDim2.new(0, 14 + math.floor(26 * Library.LogoAspect) + 8, 0, 29),
+					Size = UDim2.new(0, 0, 0, 16),
 					ZIndex = 3,
 					BorderSizePixel = 0,
 					AutomaticSize = Enum.AutomaticSize.X
@@ -4868,337 +5123,366 @@ do
 					Parent = Items["ActualTitle"].Instance,
 					FillDirection = Enum.FillDirection.Horizontal,
 					VerticalAlignment = Enum.VerticalAlignment.Center,
-					Padding = UDim.new(0, 0),
-					SortOrder = Enum.SortOrder.LayoutOrder
-				})
-
-				do
-					local TitleParts = string.split(Window.Name, "•")
-					for PartIdx, Part in TitleParts do
-						if PartIdx > 1 then
-							local DL = Library:Create("TextLabel", {
-								Name = "\0",
-								FontFace = Library.BoldFont,
-								TextSize = Library.FontSize,
-								Parent = Items["ActualTitle"].Instance,
-								LayoutOrder = (PartIdx - 1) * 2,
-								RichText = false,
-								TextColor3 = Library.Theme["Accent"],
-								Text = "•",
-								ZIndex = 3,
-								Size = UDim2.new(0, 0, 0, 18),
-								BorderSizePixel = 0,
-								BackgroundTransparency = 1,
-								AutomaticSize = Enum.AutomaticSize.X
-							}):AddToTheme({TextColor3 = 'Accent'})
-							Library:Create("UIStroke", {Name = "\0", Parent = DL.Instance})
-						end
-						if Part ~= "" then
-							local PL = Library:Create("TextLabel", {
-								Name = "\0",
-								FontFace = Library.BoldFont,
-								TextSize = Library.FontSize,
-								Parent = Items["ActualTitle"].Instance,
-								LayoutOrder = (PartIdx - 1) * 2 + 1,
-								RichText = true,
-								TextColor3 = Library.Theme["Text"],
-								Text = Part,
-								ZIndex = 3,
-								Size = UDim2.new(0, 0, 0, 18),
-								BorderSizePixel = 0,
-								BackgroundTransparency = 1,
-								AutomaticSize = Enum.AutomaticSize.X
-							}):AddToTheme({TextColor3 = 'Text'})
-							Library:Create("UIStroke", {Name = "\0", Parent = PL.Instance})
-						end
-					end
-				end
-
-				Items["IconBar"] = Library:Create("Frame", {
-					Name = "\0",
-					Parent = Library.Holder.Instance,
-					AnchorPoint = Vector2.new(0.5, 0),
-					Position = UDim2.new(0.5, 0, 0, 8),
-					Size = UDim2.new(0, 126, 0, 26),
-					ZIndex = 60,
-					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Background"]
-				}):AddToTheme({BackgroundColor3 = 'Background'})
-
-				Items["IconBar"]:MakeDraggable()
-
-				for _, Layer in {
-					{Key = "Outline 1", Offset = 0},
-					{Key = "Outline 3", Offset = 1},
-					{Key = "Outline 2", Offset = 2},
-					{Key = "Outline 4", Offset = 3}
-				} do
-					Library:Create("UIStroke", {
-						Name = "\0",
-						Parent = Items["IconBar"].Instance,
-						ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-						LineJoinMode = Enum.LineJoinMode.Miter,
-						Color = Library.Theme[Layer.Key],
-						BorderOffset = UDim.new(0, Layer.Offset)
-					}):AddToTheme({Color = Layer.Key})
-				end
-
-				Library:Create("UIListLayout", {
-					Name = "\0",
-					Parent = Items["IconBar"].Instance,
-					FillDirection = Enum.FillDirection.Horizontal,
-					HorizontalAlignment = Enum.HorizontalAlignment.Center,
-					VerticalAlignment = Enum.VerticalAlignment.Center,
 					Padding = UDim.new(0, 4),
 					SortOrder = Enum.SortOrder.LayoutOrder
 				})
 
-				local MakeIconButton = function(Order)
+				for PartIdx, Part in string.split(Window.Name, "•") do
+					Part = Part:match("^%s*(.-)%s*$")
+
+					if PartIdx > 1 and Part ~= "" then
+						Library:Create("TextLabel", {
+							Name = "\0",
+							FontFace = Library.Font,
+							TextSize = Library.FontSize - 1,
+							Parent = Items["ActualTitle"].Instance,
+							LayoutOrder = PartIdx,
+							TextColor3 = Library.Theme["Inactive Text"],
+							Text = Part,
+							ZIndex = 3,
+							Size = UDim2.new(0, 0, 0, 16),
+							BorderSizePixel = 0,
+							BackgroundTransparency = 1,
+							AutomaticSize = Enum.AutomaticSize.X
+						}):AddToTheme({TextColor3 = 'Inactive Text'})
+					end
+				end
+
+				-- search
+				Items["SearchBackground"] = Library:Create("Frame", {
+					Name = "\0",
+					Parent = Items["Sidebar"].Instance,
+					Position = UDim2.new(0, 10, 0, 52),
+					Size = UDim2.new(1, -20, 0, 30),
+					BorderSizePixel = 0,
+					BackgroundColor3 = Library.Theme["Element"]
+				}):AddToTheme({BackgroundColor3 = 'Element'})
+
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["SearchBackground"].Instance,
+					CornerRadius = UDim.new(0, 8)
+				})
+
+				Library:Create("UIStroke", {
+					Name = "\0",
+					Parent = Items["SearchBackground"].Instance,
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					Color = Library.Theme["Outline 1"]
+				}):AddToTheme({Color = 'Outline 1'})
+
+				Library:LucideImage(Items["SearchBackground"], "search", 14, "Inactive Text", UDim2.new(0, 16, 0.5, 0), "o")
+
+				Items["SearchBox"] = Library:Create("TextBox", {
+					Name = "\0",
+					Parent = Items["SearchBackground"].Instance,
+					FontFace = Library.Font,
+					TextSize = Library.FontSize,
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					Position = UDim2.new(0, 30, 0, 0),
+					Size = UDim2.new(1, -36, 1, 0),
+					Text = "",
+					PlaceholderText = "Search...",
+					PlaceholderColor3 = Library.Theme["Inactive Text"],
+					TextColor3 = Library.Theme["Text"],
+					TextXAlignment = Enum.TextXAlignment.Left,
+					ClearTextOnFocus = false,
+					ZIndex = 3
+				}):AddToTheme({TextColor3 = 'Text', PlaceholderColor3 = 'Inactive Text'})
+
+				-- navigation (pages are parented here)
+				Items["Pages"] = Library:Create("ScrollingFrame", {
+					Name = "\0",
+					Parent = Items["Sidebar"].Instance,
+					Active = true,
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					Position = UDim2.new(0, 8, 0, 92),
+					Size = UDim2.new(1, -16, 1, -100),
+					CanvasSize = UDim2.new(0, 0, 0, 0),
+					AutomaticCanvasSize = Enum.AutomaticSize.Y,
+					ScrollBarThickness = 0,
+					ScrollingDirection = Enum.ScrollingDirection.Y
+				})
+
+				Library:Create("UIListLayout", {
+					Name = "\0",
+					Parent = Items["Pages"].Instance,
+					Padding = UDim.new(0, 2),
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+
+				-- top bar
+				Items["TopBar"] = Library:Create("Frame", {
+					Name = "\0",
+					Parent = Items["MainFrame"].Instance,
+					BackgroundTransparency = 1,
+					Position = UDim2.new(0, SideWidth + 1, 0, 0),
+					Size = UDim2.new(1, -(SideWidth + 1), 0, 46),
+					BorderSizePixel = 0
+				})
+
+				Items["Crumb"] = Library:Create("Frame", {
+					Name = "\0",
+					Parent = Items["TopBar"].Instance,
+					Position = UDim2.new(0, 12, 0, 9),
+					Size = UDim2.new(0, 0, 0, 28),
+					AutomaticSize = Enum.AutomaticSize.X,
+					BorderSizePixel = 0,
+					BackgroundColor3 = Library.Theme["Element"]
+				}):AddToTheme({BackgroundColor3 = 'Element'})
+
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["Crumb"].Instance,
+					CornerRadius = UDim.new(0, 8)
+				})
+
+				Library:Create("UIStroke", {
+					Name = "\0",
+					Parent = Items["Crumb"].Instance,
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					Color = Library.Theme["Outline 1"]
+				}):AddToTheme({Color = 'Outline 1'})
+
+				Library:Create("UIListLayout", {
+					Name = "\0",
+					Parent = Items["Crumb"].Instance,
+					FillDirection = Enum.FillDirection.Horizontal,
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+					Padding = UDim.new(0, 6),
+					SortOrder = Enum.SortOrder.LayoutOrder
+				})
+
+				Library:Create("UIPadding", {
+					Name = "\0",
+					Parent = Items["Crumb"].Instance,
+					PaddingLeft = UDim.new(0, 10),
+					PaddingRight = UDim.new(0, 12)
+				})
+
+				Items["CrumbIcon"] = Library:Create("Frame", {
+					Name = "\0",
+					Parent = Items["Crumb"].Instance,
+					LayoutOrder = 1,
+					Size = UDim2.new(0, 14, 0, 14),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0
+				})
+
+				Items["CrumbText"] = Library:Create("TextLabel", {
+					Name = "\0",
+					FontFace = Library.BoldFont,
+					TextSize = Library.FontSize,
+					Parent = Items["Crumb"].Instance,
+					LayoutOrder = 2,
+					TextColor3 = Library.Theme["Text"],
+					Text = "",
+					Size = UDim2.new(0, 0, 0, 18),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					AutomaticSize = Enum.AutomaticSize.X
+				}):AddToTheme({TextColor3 = 'Text'})
+
+				Window.SetCrumb = function(Name, IconName)
+					Items["CrumbText"].Instance.Text = Name or ""
+
+					for _, Child in Items["CrumbIcon"].Instance:GetChildren() do
+						Child:Destroy()
+					end
+
+					Items["CrumbIcon"].Instance.Visible = IconName ~= nil
+
+					if IconName then
+						Library:LucideImage(Items["CrumbIcon"], IconName, 14, "Accent", nil, "•")
+					end
+				end
+
+				local MakeControl = function(Order, IconName, Fallback)
 					local Button = Library:Create("TextButton", {
 						Name = "\0",
-						Parent = Items["IconBar"].Instance,
+						Parent = Items["TopBar"].Instance,
 						Text = "",
 						AutoButtonColor = false,
-						LayoutOrder = Order,
-						Size = UDim2.new(0, 22, 0, 20),
-						ZIndex = 61,
+						AnchorPoint = Vector2.new(1, 0.5),
+						Position = UDim2.new(1, -(10 + (Order - 1) * 32), 0.5, 0),
+						Size = UDim2.new(0, 26, 0, 26),
 						BorderSizePixel = 0,
 						BackgroundTransparency = 1,
 						BackgroundColor3 = Library.Theme["Element"]
 					}):AddToTheme({BackgroundColor3 = 'Element'})
 
+					Library:Create("UICorner", {
+						Name = "\0",
+						Parent = Button.Instance,
+						CornerRadius = UDim.new(0, 7)
+					})
+
+					Library:LucideImage(Button, IconName, 14, "Inactive Text", nil, Fallback)
+
 					Button:Connect("MouseEnter", function()
-						Button:Tween({BackgroundTransparency = 0}, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out))
+						Button:Tween({BackgroundTransparency = 0}, Hover)
 					end)
 
 					Button:Connect("MouseLeave", function()
-						Button:Tween({BackgroundTransparency = 1}, TweenInfo.new(0.12, Enum.EasingStyle.Quad, Enum.EasingDirection.Out))
+						Button:Tween({BackgroundTransparency = 1}, Hover)
 					end)
 
 					return Button
 				end
 
-				Items["HomeGlyphs"] = { }
-				Items["ConsoleGlyphs"] = { }
-				Items["PlayersGlyphs"] = { }
-				Items["KeybindsGlyphs"] = { }
-				Items["NotifyGlyphs"] = { }
+				Items["CloseButton"] = MakeControl(1, "x", "x")
+				Items["MinimizeButton"] = MakeControl(2, "minus", "-")
 
-				Library.IconCut = function(Self, Parent, Position, Size, Radius, Rotation)
-					local Cut = Library:Create("Frame", {
-						Name = "\0",
-						Parent = Parent.Instance,
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						Position = Position,
-						Size = Size,
-						Rotation = Rotation or 0,
-						ZIndex = 63,
-						BorderSizePixel = 0,
-						BackgroundColor3 = Library.Theme["Background"]
-					}):AddToTheme({BackgroundColor3 = 'Background'})
-
-					if Radius then
-						Library:IconRound(Cut, Radius)
-					end
-
-					return Cut
-				end
-
-				Library.IconOutline = function(Self, Parent, Position, Size, Radius, Thickness, Registry)
-					local Frame = Library:Create("Frame", {
-						Name = "\0",
-						Parent = Parent.Instance,
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						Position = Position,
-						Size = Size,
-						ZIndex = 62,
-						BorderSizePixel = 0,
-						BackgroundTransparency = 1
-					})
-
-					Library:Create("UICorner", {
-						Name = "\0",
-						Parent = Frame.Instance,
-						CornerRadius = UDim.new(0, Radius or 0)
-					})
-
-					local Stroke = Library:Create("UIStroke", {
-						Name = "\0",
-						Parent = Frame.Instance,
-						Thickness = Thickness or 1.6,
-						Color = Library.Theme["Accent"]
-					}):AddToTheme({Color = 'Accent'})
-
-					if Registry then
-						table.insert(Registry, {Item = Stroke, Property = "Color"})
-					end
-
-					return Frame
-				end
-
-				local SetIconState = function(Registry, Active)
-					local Key = Active and "Accent" or "Inactive Text"
-
-					for _, Entry in Registry do
-						Entry.Item:ChangeItemTheme({[Entry.Property] = Key})
-						Entry.Item:Tween({[Entry.Property] = Library.Theme[Key]}, TweenInfo.new(0.14, Enum.EasingStyle.Quad, Enum.EasingDirection.Out))
-					end
-				end
-
-				local MakeIconPiece = function(Parent, Position, Size, Rotation, Registry)
-					local Piece = Library:Create("Frame", {
-						Name = "\0",
-						Parent = Parent.Instance,
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						Position = Position,
-						Size = Size,
-						Rotation = Rotation or 0,
-						ZIndex = 62,
-						BorderSizePixel = 0,
-						BackgroundColor3 = Library.Theme["Accent"]
-					}):AddToTheme({BackgroundColor3 = 'Accent'})
-
-					Library:AccentGradient(Piece, 90)
-
-					if Registry then
-						table.insert(Registry, {Item = Piece, Property = "BackgroundColor3"})
-					end
-
-					return Piece
-				end
-
-				Items["HomeButton"] = MakeIconButton(1)
-
-				for Index, Bar in {
-					{Position = UDim2.new(0.5, -3.8, 0.5, -3.6), Size = UDim2.new(0, 11, 0, 4), Rotation = -41},
-					{Position = UDim2.new(0.5, 3.8, 0.5, -3.6), Size = UDim2.new(0, 11, 0, 4), Rotation = 41},
-					{Position = UDim2.new(0.5, 0, 0.5, 3.2), Size = UDim2.new(0, 11.4, 0, 8.2), Rotation = 0}
-				} do
-					Library:IconRound(MakeIconPiece(Items["HomeButton"], Bar.Position, Bar.Size, Bar.Rotation, Items["HomeGlyphs"]), 1.4)
-				end
-
-				MakeIconPiece(Items["HomeButton"], UDim2.new(0.5, 0, 0.5, -0.9), UDim2.new(0, 5.2, 0, 5.2), 45, Items["HomeGlyphs"])
-
-				Library:IconCut(Items["HomeButton"], UDim2.new(0.5, 0, 0.5, 4.9), UDim2.new(0, 4.2, 0, 5.6), 2)
-
-				Items["ConsoleButton"] = MakeIconButton(2)
-
-				Library:IconRound(MakeIconPiece(Items["ConsoleButton"], UDim2.new(0.5, 0, 0.5, 0), UDim2.new(0, 16, 0, 13), 0, Items["ConsoleGlyphs"]), 2)
-
-				Library:IconCut(Items["ConsoleButton"], UDim2.new(0.5, 0, 0.5, 1.1), UDim2.new(0, 13, 0, 7.8), 0.5)
-
-				for Index, Dot in {-5.2, -2.6, 0} do
-					Library:IconCut(Items["ConsoleButton"], UDim2.new(0.5, Dot, 0.5, -4.5), UDim2.new(0, 1.8, 0, 1.8), 99)
-				end
-
-				for Index, Bar in {
-					{Position = UDim2.new(0.5, -3, 0.5, -0.4), Size = UDim2.new(0, 4.2, 0, 1.5), Rotation = 37},
-					{Position = UDim2.new(0.5, -3, 0.5, 2), Size = UDim2.new(0, 4.2, 0, 1.5), Rotation = -37},
-					{Position = UDim2.new(0.5, 2.7, 0.5, 3.2), Size = UDim2.new(0, 4.4, 0, 1.5), Rotation = 0}
-				} do
-					local Piece = MakeIconPiece(Items["ConsoleButton"], Bar.Position, Bar.Size, Bar.Rotation, Items["ConsoleGlyphs"])
-
-					Piece.Instance.ZIndex = 64
-
-					Library:IconRound(Piece, 1)
-				end
-
-				Window.UpdateIcons = function()
-					SetIconState(Items["HomeGlyphs"], Window.IsOpen ~= false)
-				end
-
-				Library.UpdateConsoleIcon = function(Active)
-					SetIconState(Items["ConsoleGlyphs"], Active and true or false)
-				end
-
-				Window.UpdateIcons()
-				Library.UpdateConsoleIcon(false)
-
-				Items["HomeButton"]:Connect("MouseButton1Click", function()
-					Window:SetOpen(not Window.IsOpen)
+				Items["MinimizeButton"]:Connect("MouseButton1Click", function()
+					Window:SetOpen(false)
 				end)
 
-				Items["ConsoleButton"]:Connect("MouseButton1Click", function()
-					local Target = Library.ConsoleObject
-
-					if Target and Target.Items and Target.Items["Console"] then
-						Target:SetVisibility(not Target.Items["Console"].Instance.Visible)
-					end
+				Items["CloseButton"]:Connect("MouseButton1Click", function()
+					Library:Exit()
 				end)
 
-				Items["PlayersButton"] = MakeIconButton(3)
-
-				Library:IconRound(MakeIconPiece(Items["PlayersButton"], UDim2.new(0.5, -6, 0.5, -2), UDim2.new(0, 4, 0, 4), 0, Items["PlayersGlyphs"]), 99)
-				Library:IconRound(MakeIconPiece(Items["PlayersButton"], UDim2.new(0.5, -6, 0.5, 4), UDim2.new(0, 6, 0, 5), 0, Items["PlayersGlyphs"]), 2)
-
-				Library:IconRound(MakeIconPiece(Items["PlayersButton"], UDim2.new(0.5, 6, 0.5, -2), UDim2.new(0, 4, 0, 4), 0, Items["PlayersGlyphs"]), 99)
-				Library:IconRound(MakeIconPiece(Items["PlayersButton"], UDim2.new(0.5, 6, 0.5, 4), UDim2.new(0, 6, 0, 5), 0, Items["PlayersGlyphs"]), 2)
-
-				Library:IconRound(MakeIconPiece(Items["PlayersButton"], UDim2.new(0.5, 0, 0.5, -3), UDim2.new(0, 6, 0, 6), 0, Items["PlayersGlyphs"]), 99)
-				Library:IconRound(MakeIconPiece(Items["PlayersButton"], UDim2.new(0.5, 0, 0.5, 4), UDim2.new(0, 9, 0, 7), 0, Items["PlayersGlyphs"]), 3)
-
-				Items["KeybindsButton"] = MakeIconButton(4)
-
-				Items["KeybindsGlyph"] = Library:Create("Frame", {
+				-- content (pages are parented here)
+				Items["Content"] = Library:Create("Frame", {
 					Name = "\0",
-					Parent = Items["KeybindsButton"].Instance,
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					Position = UDim2.new(0.5, 0, 0.5, 0),
-					Size = UDim2.new(0, 16, 0, 12),
-					ZIndex = 62,
-					BorderSizePixel = 0,
-					BackgroundTransparency = 1
+					Parent = Items["MainFrame"].Instance,
+					BackgroundTransparency = 1,
+					Position = UDim2.new(0, SideWidth + 9, 0, 46),
+					Size = UDim2.new(1, -(SideWidth + 17), 1, -54),
+					BorderSizePixel = 0
 				})
 
-				Items["KeybindsOutline"] = Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["KeybindsGlyph"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Inactive Text"]
-				}):AddToTheme({Color = 'Inactive Text'})
+				-- nav groups
+				Window.NavSlot = function(Group)
+					Group = Group or ""
 
-				table.insert(Items["KeybindsGlyphs"], {Item = Items["KeybindsOutline"], Property = "Color"})
+					local Data = Window.Groups[Group]
+
+					if not Data then
+						Window.GroupCount += 1
+						Data = {Order = Window.GroupCount * 1000, Count = 0, Pages = { }}
+						Window.Groups[Group] = Data
+
+						if Group ~= "" then
+							Data.Header = Library:Create("TextLabel", {
+								Name = "\0",
+								FontFace = Library.BoldFont,
+								TextSize = 10,
+								Parent = Items["Pages"].Instance,
+								LayoutOrder = Data.Order,
+								TextColor3 = Library.Theme["Inactive Text"],
+								Text = string.upper(Group),
+								TextXAlignment = Enum.TextXAlignment.Left,
+								Size = UDim2.new(1, 0, 0, 24),
+								BackgroundTransparency = 1,
+								BorderSizePixel = 0
+							}):AddToTheme({TextColor3 = 'Inactive Text'})
+
+							Library:Create("UIPadding", {
+								Name = "\0",
+								Parent = Data.Header.Instance,
+								PaddingLeft = UDim.new(0, 10),
+								PaddingTop = UDim.new(0, 8)
+							})
+						end
+					end
+
+					Data.Count += 1
+					return Data.Order + Data.Count, Data
+				end
+
+				Window.FilterPages = function()
+					local Query = string.lower(Items["SearchBox"].Instance.Text or "")
+
+					for _, Data in Window.Groups do
+						local Any = false
+
+						for _, Entry in Data.Pages do
+							local Match = Query == "" or string.find(string.lower(Entry.Name), Query, 1, true) ~= nil
+							Entry.Items["Inactive"].Instance.Visible = Match
+							Any = Any or Match
+						end
+
+						if Data.Header then
+							Data.Header.Instance.Visible = Any
+						end
+					end
+				end
+
+				Items["SearchBox"]:Connect("Changed", function(Property)
+					if Property == "Text" then
+						Window.FilterPages()
+					end
+				end)
+
+				-- small floating open/close button (works on mobile, always reachable)
+				Items["FloatLayer"] = Library:CreateLayer()
+				Items["FloatLayer"].Instance.DisplayOrder = 2000000
+
+				Items["Float"] = Library:Create("TextButton", {
+					Name = "\0",
+					Parent = Items["FloatLayer"].Instance,
+					Text = "",
+					AutoButtonColor = false,
+					Position = UDim2.new(0, 14, 0, math.floor(Viewport.Y * 0.35)),
+					Size = UDim2.new(0, 70, 0, 34),
+					BorderSizePixel = 0,
+					BackgroundColor3 = Library.Theme["Background"]
+				}):AddToTheme({BackgroundColor3 = 'Background'})
 
 				Library:Create("UICorner", {
 					Name = "\0",
-					Parent = Items["KeybindsGlyph"].Instance,
-					CornerRadius = UDim.new(0, 2)
+					Parent = Items["Float"].Instance,
+					CornerRadius = UDim.new(1, 0)
 				})
 
-				Library:IconRound(MakeIconPiece(Items["KeybindsGlyph"], UDim2.new(0.5, -5, 0.5, -2), UDim2.new(0, 2, 0, 2), 0, Items["KeybindsGlyphs"]), 1)
-				Library:IconRound(MakeIconPiece(Items["KeybindsGlyph"], UDim2.new(0.5, -2, 0.5, -2), UDim2.new(0, 2, 0, 2), 0, Items["KeybindsGlyphs"]), 1)
-				Library:IconRound(MakeIconPiece(Items["KeybindsGlyph"], UDim2.new(0.5, 2, 0.5, -2), UDim2.new(0, 2, 0, 2), 0, Items["KeybindsGlyphs"]), 1)
-				Library:IconRound(MakeIconPiece(Items["KeybindsGlyph"], UDim2.new(0.5, 5, 0.5, -2), UDim2.new(0, 2, 0, 2), 0, Items["KeybindsGlyphs"]), 1)
+				Items["FloatStroke"] = Library:Create("UIStroke", {
+					Name = "\0",
+					Parent = Items["Float"].Instance,
+					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+					Thickness = 1.5,
+					Color = Library.Theme["Accent"]
+				}):AddToTheme({Color = 'Accent'})
 
-				Library:IconRound(MakeIconPiece(Items["KeybindsGlyph"], UDim2.new(0.5, -6, 0.5, 2), UDim2.new(0, 2, 0, 2), 0, Items["KeybindsGlyphs"]), 99)
-				Library:IconRound(MakeIconPiece(Items["KeybindsGlyph"], UDim2.new(0.5, 0, 0.5, 2), UDim2.new(0, 8, 0, 2), 0, Items["KeybindsGlyphs"]), 1)
-				Library:IconRound(MakeIconPiece(Items["KeybindsGlyph"], UDim2.new(0.5, 6, 0.5, 2), UDim2.new(0, 2, 0, 2), 0, Items["KeybindsGlyphs"]), 99)
+				Items["FloatGlyph"] = Library:Logo(Items["Float"], 20, UDim2.new(0.5, 0, 0.5, 0), Vector2.new(0.5, 0.5))
 
-				Items["NotifyButton"] = MakeIconButton(5)
+				Items["Float"]:MakeDraggable()
 
-				Library:IconRound(MakeIconPiece(Items["NotifyButton"], UDim2.new(0.5, 0, 0.5, 0), UDim2.new(0, 14, 0, 14), 0, Items["NotifyGlyphs"]), 99)
+				local FloatStart = nil
 
-				Library:IconCut(Items["NotifyButton"], UDim2.new(0.5, 0, 0.5, -3), UDim2.new(0, 2, 0, 2), 99)
-				Library:IconCut(Items["NotifyButton"], UDim2.new(0.5, 0, 0.5, 2), UDim2.new(0, 2, 0, 5), 1)
+				Items["Float"]:Connect("InputBegan", function(Input)
+					if Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch then
+						FloatStart = Input.Position
+					end
+				end)
 
-				Library:IconImage(Items["HomeButton"], "Home", Items["HomeGlyphs"])
-				Library:IconImage(Items["ConsoleButton"], "Console", Items["ConsoleGlyphs"])
-				Library:IconImage(Items["PlayersButton"], "Players", Items["PlayersGlyphs"])
-				Library:IconImage(Items["KeybindsButton"], "Keybinds", Items["KeybindsGlyphs"])
-				Library:IconImage(Items["NotifyButton"], "Notifications", Items["NotifyGlyphs"])
+				Library:Connect(UserInputService.InputEnded, function(Input)
+					if FloatStart and (Input.UserInputType == Enum.UserInputType.MouseButton1 or Input.UserInputType == Enum.UserInputType.Touch) then
+						local Moved = (Input.Position - FloatStart).Magnitude
+						FloatStart = nil
 
-				Library.UpdatePlayersIcon = function(Active)
-					SetIconState(Items["PlayersGlyphs"], Active and true or false)
+						if Moved < 8 then
+							Window:SetOpen(not Window.IsOpen)
+						end
+					end
+				end)
+
+				Window.UpdateIcons = function()
+					local Open = Window.IsOpen ~= false
+
+					Items["FloatStroke"]:ChangeItemTheme({Color = Open and "Accent" or "Outline 1"})
+					Items["FloatStroke"]:Tween({Color = Open and Library.Theme["Accent"] or Library.Theme["Outline 1"]}, Hover)
 				end
 
-				Library.UpdateKeybindsIcon = function(Active)
-					SetIconState(Items["KeybindsGlyphs"], Active and true or false)
-				end
+				Window.UpdateIcons()
+				Library.EffectsSet(true)
 
-				Library.UpdateNotifyIcon = function(Active)
-					SetIconState(Items["NotifyGlyphs"], Active and true or false)
-				end
+				-- icon hooks used by other components (no-ops in this layout)
+				Library.UpdateConsoleIcon = function() end
+				Library.UpdatePlayersIcon = function() end
+				Library.UpdateKeybindsIcon = function() end
+				Library.UpdateNotifyIcon = function() end
 
 				Library.IconVisible = function(Object, Key)
 					local Visible = false
@@ -5209,39 +5493,6 @@ do
 
 					return Visible
 				end
-
-				Library.UpdatePlayersIcon(Library.PlayerListObject and Library.IconVisible(Library.PlayerListObject, "PlayerList"))
-				Library.UpdateKeybindsIcon(Library.KeyList and Library.IconVisible(Library.KeyList, "KeybindList"))
-				Library.UpdateNotifyIcon(Library.NotificationsEnabled ~= false)
-
-				Items["PlayersButton"]:Connect("MouseButton1Click", function()
-					local Target = Library.PlayerListObject
-
-					if not Target then
-						return
-					end
-
-					Target:SetVisibility(not Library.IconVisible(Target, "PlayerList"))
-				end)
-
-				Items["KeybindsButton"]:Connect("MouseButton1Click", function()
-					local Target = Library.KeyList
-
-					if not Target then
-						return
-					end
-
-					Target:SetVisibility(not Library.IconVisible(Target, "KeybindList"))
-				end)
-
-				Items["NotifyButton"]:Connect("MouseButton1Click", function()
-					Library.NotificationsEnabled = Library.NotificationsEnabled == false
-					Library.UpdateNotifyIcon(Library.NotificationsEnabled)
-
-					if Library.NotificationsEnabled then
-						Library:Notification({Name = "notifications on", Time = 2})
-					end
-				end)
 
 				Window.Items = Items
 			end
@@ -5256,6 +5507,7 @@ do
 				Debounce = true
 
 				Window.IsOpen = Bool
+				Library.EffectsSet(Bool)
 
 				if Window.UpdateIcons then
 					Window.UpdateIcons()
@@ -5296,6 +5548,8 @@ do
 
 			local Page = {
 				Name = Params.Name or Params.name or "Page",
+				Icon = Params.Icon or Params.icon or Library.PageIcons[string.lower(Params.Name or Params.name or "")],
+				Group = Params.Group or Params.group,
 
 				Window = Self,
 				ColumnsData = { },
@@ -5305,37 +5559,29 @@ do
 			}
 
 			local Items = { } do
+				local NavOrder, GroupData = Page.Window.NavSlot(Page.Group)
+
 				Items["Inactive"] = Library:Create("TextButton", {
 					Name = "\0",
 					FontFace = Library.Font,
 					TextSize = Library.FontSize,
 					Parent = Page.Window.Items["Pages"].Instance,
-					TextColor3 = Color3.fromRGB(0, 0, 0),
 					Text = "",
 					AutoButtonColor = false,
-					AutomaticSize = Enum.AutomaticSize.None,
-					Size = UDim2.new(0, 0, 1, 0),
+					LayoutOrder = NavOrder,
+					Size = UDim2.new(1, 0, 0, 32),
 					BorderSizePixel = 0,
-					ZIndex = 2,
-					BackgroundColor3 = Library.Theme["Inline"]
-				}):AddToTheme({BackgroundColor3 = 'Inline'})
+					BackgroundTransparency = 1,
+					BackgroundColor3 = Library.Theme["Element"]
+				}):AddToTheme({BackgroundColor3 = 'Element'})
 
-				Library:Create("UIPadding", {
+				Library:Create("UICorner", {
 					Name = "\0",
 					Parent = Items["Inactive"].Instance,
-					PaddingRight = UDim.new(0, 7),
-					PaddingLeft = UDim.new(0, 7)
+					CornerRadius = UDim.new(0, 8)
 				})
 
-				Items["Shade"] = Library:Create("UIGradient", {
-					Name = "\0",
-					Parent = Items["Inactive"].Instance,
-					Rotation = 90,
-					Color = ColorSequence.new{
-						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-					}
-				})
+				Items["Glyph"] = Page.Icon and Library:LucideImage(Items["Inactive"], Page.Icon, 16, "Inactive Text", UDim2.new(0, 19, 0.5, 0), "•")
 
 				Items["Text"] = Library:Create("TextLabel", {
 					Name = "\0",
@@ -5344,36 +5590,18 @@ do
 					Parent = Items["Inactive"].Instance,
 					TextColor3 = Library.Theme["Inactive Text"],
 					Text = Page.Name,
-					AutomaticSize = Enum.AutomaticSize.X,
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					Size = UDim2.new(0, 0, 0, 18),
+					TextXAlignment = Enum.TextXAlignment.Left,
+					TextTruncate = Enum.TextTruncate.AtEnd,
+					AnchorPoint = Vector2.new(0, 0.5),
+					Size = UDim2.new(1, -40, 0, 18),
 					BackgroundTransparency = 1,
-					Position = UDim2.new(0.5, 0, 0.5, 0),
+					Position = UDim2.new(0, 36, 0.5, 0),
 					BorderSizePixel = 0,
 					ZIndex = 2
 				}):AddToTheme({TextColor3 = 'Inactive Text'})
 
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["Text"].Instance
-				})
+				table.insert(GroupData.Pages, Page)
 
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["Inactive"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 1"]
-				}):AddToTheme({Color = 'Outline 1'})
-
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["Inactive"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 3"],
-					BorderOffset = UDim.new(0, 1)
-				}):AddToTheme({Color = 'Outline 3'})
 
 				Items["Page"] = Library:Create("Frame", {
 					Name = "\0",
@@ -5457,6 +5685,7 @@ do
 				Page.Items = Items
 			end
 
+
 			function Page:Turn()
 				local Old = Page.Window.Current
 
@@ -5478,17 +5707,12 @@ do
 					Old.Items["Text"]:ChangeItemTheme({TextColor3 = "Inactive Text"})
 					Old.Items["Text"]:Tween({TextColor3 = Library.Theme["Inactive Text"]})
 
-					Old.Items["Inactive"]:Tween({BackgroundColor3 = Library.Theme["Inline"]})
-
-					if Old.Items["Shade"] then
-						Old.Items["Shade"].Instance.Color = ColorSequence.new{
-							ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-							ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 255, 255))
-						}
+					if Old.Items["Glyph"] then
+						Old.Items["Glyph"]:ChangeItemTheme({ImageColor3 = "Inactive Text"})
+						Old.Items["Glyph"]:Tween({ImageColor3 = Library.Theme["Inactive Text"]})
 					end
 
-					Old.Items["Inactive"].Instance.Size = UDim2.new(1 / math.max(#Page.Window.Pages, 1), 0, 1, 0)
-					Old.Items["Text"].Instance.Position = UDim2.new(0.5, 0, 0.5, 0)
+					Old.Items["Inactive"]:Tween({BackgroundTransparency = 1})
 
 					Old.Items["Page"]:FadeDescendants(false, function()
 						Old.Items["Page"].Instance.Parent = Library.UnusedHolder.Instance
@@ -5501,21 +5725,19 @@ do
 					Page.Debounce = false
 				end)
 
-				Items["Text"]:ChangeItemTheme({TextColor3 = "Accent"})
-				Items["Text"]:Tween({TextColor3 = Library.Theme.Accent})
+				Items["Text"]:ChangeItemTheme({TextColor3 = "Text"})
+				Items["Text"]:Tween({TextColor3 = Library.Theme["Text"]})
 
-				Items["Inactive"]:Tween({BackgroundColor3 = Library.Theme["Hovered Element"]})
-
-				if Items["Shade"] then
-					Items["Shade"].Instance.Color = ColorSequence.new{
-						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-						ColorSequenceKeypoint.new(0.5, Color3.fromRGB(226, 226, 226)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(184, 184, 184))
-					}
+				if Items["Glyph"] then
+					Items["Glyph"]:ChangeItemTheme({ImageColor3 = "Accent"})
+					Items["Glyph"]:Tween({ImageColor3 = Library.Theme["Accent"]})
 				end
 
-				Items["Inactive"].Instance.Size = UDim2.new(1 / math.max(#Page.Window.Pages, 1), 0, 1, 0)
-				Items["Text"].Instance.Position = UDim2.new(0.5, 0, 0.5, 0)
+				Items["Inactive"]:Tween({BackgroundTransparency = 0})
+
+				if Page.Window.SetCrumb then
+					Page.Window.SetCrumb(Page.Name, Page.Icon)
+				end
 
 				Page.Window.Current = Page
 			end
@@ -5524,18 +5746,23 @@ do
 				Page:Turn()
 			end)
 
+			Items["Inactive"]:Connect("MouseEnter", function()
+				if Page.Window.Current ~= Page then
+					Items["Inactive"]:Tween({BackgroundTransparency = 0.6})
+				end
+			end)
+
+			Items["Inactive"]:Connect("MouseLeave", function()
+				if Page.Window.Current ~= Page then
+					Items["Inactive"]:Tween({BackgroundTransparency = 1})
+				end
+			end)
+
 			if #Page.Window.Pages == 0 then
 				Page:Turn()
 			end
 
 			table.insert(Page.Window.Pages, Page)
-
-			local PageCount = #Page.Window.Pages
-			for _, ExistingPage in Page.Window.Pages do
-				ExistingPage.Items["Inactive"].Instance.AutomaticSize = Enum.AutomaticSize.None
-				ExistingPage.Items["Inactive"].Instance.Size = UDim2.new(1 / PageCount, 0, 1, 0)
-			end
-
 			return setmetatable(Page, Library)
 		end
 
@@ -5565,6 +5792,12 @@ do
 					BackgroundColor3 = Library.Theme["Section Box"]
 				}):AddToTheme({BackgroundColor3 = 'Section Box'})
 
+				Library:Create("UICorner", {
+					Name = "\0",
+					Parent = Items["Section"].Instance,
+					CornerRadius = UDim.new(0, 8)
+				})
+
 				Library:Create("UIStroke", {
 					Name = "\0",
 					Parent = Items["Section"].Instance,
@@ -5573,14 +5806,6 @@ do
 					Color = Library.Theme["Outline 1"]
 				}):AddToTheme({Color = 'Outline 1'})
 
-				Library:Create("UIStroke", {
-					Name = "\0",
-					Parent = Items["Section"].Instance,
-					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-					LineJoinMode = Enum.LineJoinMode.Miter,
-					Color = Library.Theme["Outline 3"],
-					BorderOffset = UDim.new(0, 1)
-				}):AddToTheme({Color = 'Outline 3'})
 
 				Items["Header"] = Library:Create("Frame", {
 					Name = "\0",
@@ -5588,6 +5813,7 @@ do
 					Position = UDim2.new(0, 0, 0, 0),
 					Size = UDim2.new(1, 0, 0, 25),
 					BorderSizePixel = 0,
+					BackgroundTransparency = 1,
 					BackgroundColor3 = Library.Theme["Element"]
 				}):AddToTheme({BackgroundColor3 = 'Element'})
 
@@ -5597,33 +5823,13 @@ do
 					CornerRadius = UDim.new(0, 3)
 				})
 
-				Library:Create("UIGradient", {
-					Name = "\0",
-					Parent = Items["Header"].Instance,
-					Rotation = 90,
-					Color = ColorSequence.new{
-						ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-						ColorSequenceKeypoint.new(0.5, Color3.fromRGB(218, 218, 218)),
-						ColorSequenceKeypoint.new(1, Color3.fromRGB(167, 167, 167))
-					}
-				})
-
-				Library:Create("Frame", {
-					Name = "\0",
-					Parent = Items["Header"].Instance,
-					AnchorPoint = Vector2.new(0, 1),
-					Position = UDim2.new(0, 0, 1, 0),
-					Size = UDim2.new(1, 0, 0, 1),
-					BorderSizePixel = 0,
-					BackgroundColor3 = Library.Theme["Outline 1"]
-				}):AddToTheme({BackgroundColor3 = 'Outline 1'})
 
 				Items["Text"] = Library:Create("TextLabel", {
 					Name = "\0",
 					FontFace = Library.BoldFont,
 					TextSize = Library.FontSize,
 					Parent = Items["Header"].Instance,
-					TextColor3 = Library.Theme["Text"],
+					TextColor3 = Library.Theme["Inactive Text"],
 					Text = Section.Name,
 					AnchorPoint = Vector2.new(0, 0.5),
 					Size = UDim2.new(0, 0, 0, 16),
@@ -5631,7 +5837,7 @@ do
 					Position = UDim2.new(0, 7, 0.5, 0),
 					BorderSizePixel = 0,
 					AutomaticSize = Enum.AutomaticSize.X
-				}):AddToTheme({TextColor3 = 'Text'})
+				}):AddToTheme({TextColor3 = 'Inactive Text'})
 
 				Library:Create("UIStroke", {
 					Name = "\0",
